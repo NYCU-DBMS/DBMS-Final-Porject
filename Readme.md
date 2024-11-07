@@ -11,3 +11,9 @@ cd Frontend
 npm install
 npm run dev
 ```
+### Backend
+```bash
+cd Backend
+npm install
+npm run dev
+```
