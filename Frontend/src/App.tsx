@@ -4,7 +4,7 @@ import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   return (
-    <div className='h-screen flex flex-col'>
+    <div className='h-screen flex flex-col dark:bg-slate-800'>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="*" element={<NotFoundPage />} />
