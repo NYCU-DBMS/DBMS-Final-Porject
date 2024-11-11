@@ -1,11 +1,14 @@
-import { Button } from "./components/ui/button";
-
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   return (
-    <div>
-      <div className="text-2xl">Hello world</div>
-      <Button>Click me</Button>
+    <div className='h-screen flex flex-col'>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
     </div>
   )
 }
