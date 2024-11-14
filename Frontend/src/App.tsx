@@ -7,11 +7,26 @@ import LogoutPage from './pages/LogoutPage';
 import FavoriteListPage from './pages/FavoriteListPage';
 
 import NavBar from './components/NavBar';
+import Links from './components/Links';
+
+import { useState } from 'react';
 
 export default function App() {
+
+  // handle navbar props
+  // using hooks
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [userName, setUserName] = useState('user1');
+  const onLogout = () => {
+    setIsLoggedIn(false);
+    setUserName('');
+  };
+  
+
   return (
     <div className='h-screen flex flex-col dark:bg-slate-800'>
-      <NavBar />
+      <NavBar isLoggedIn={isLoggedIn} onLogout={onLogout} userName={userName} />
+      <Links />
       <div className='flex-1'>
         <Routes>
           <Route path="/" element={<HomePage />} />
