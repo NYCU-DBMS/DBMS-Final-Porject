@@ -14,6 +14,8 @@ npm run dev
 
 ### Backend
 
+撰寫時請統一使用小駝峰命名函數
+
 請先安裝PostgreSQL 16.4，option都照預設就好
 選application時，選Web Devlopment的2.4.58-2
 然後進去PGAdmin在PostgreSQL 16的server上面創一個test的資料庫

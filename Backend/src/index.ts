@@ -1,6 +1,7 @@
 import express from 'express'
 import { query } from './db.js';
-import db_test from './db_test.js'; // 匯入 birds 模組
+import db_test from './db_test.js';
+import db_init from './db_init.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -29,3 +30,4 @@ app.listen(port, () => {
 })
 
 app.use('/dbtest', db_test)
+app.use('/dbinit', db_init)
