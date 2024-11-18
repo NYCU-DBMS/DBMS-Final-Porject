@@ -17,8 +17,8 @@ interface NavbarProps {
 
 export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) {
   return (
-    <nav className="w-full border-b">
-      <div className="flex h-16 items-center px-4">
+    <nav className="w-full border-b z-50">
+      <div className="flex h-16 items-center px-4 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"> {/* 將陰影添加到這個 div */}
         <div className="flex-1">
           <h2 className="text-xl font-bold">Anime Helper</h2>
         </div>
@@ -38,9 +38,13 @@ export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) 
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-5 w-5" />
-                  <span>Profile</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/Profile" className="w-full">
+                    <div className="flex items-center">
+                      <User className="mr-2 h-5 w-5" />
+                      <span>Profile</span>
+                    </div>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onLogout}>
                   <LogOut className="mr-2 h-5 w-5" />

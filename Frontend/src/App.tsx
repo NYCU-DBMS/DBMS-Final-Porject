@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import { AuthPage } from './pages/AuthPage';
 import FavoriteListPage from './pages/FavoriteListPage';
+import Profile from './pages/Profile';  // 添加這行
 import NavBar from './components/NavBar';
 import Links from './components/Links';
 import toast, { Toaster } from 'react-hot-toast'
@@ -34,7 +35,7 @@ const AppContent = () => {
 
   return (
     <div className='min-h-screen flex flex-col dark:bg-slate-800'>
-      <Toaster 
+      <Toaster
         position="top-center"
         toastOptions={{
           duration: 1500,
@@ -44,7 +45,6 @@ const AppContent = () => {
           },
         }}
       />
-      
       <NavBar
         isLoggedIn={!!user}
         onLogout={handleLogout}
@@ -59,6 +59,12 @@ const AppContent = () => {
             path="/favorites"
             element={
               user ? <FavoriteListPage /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              user ? <Profile /> : <Navigate to="/login" replace />
             }
           />
           <Route path="*" element={<NotFoundPage />} />

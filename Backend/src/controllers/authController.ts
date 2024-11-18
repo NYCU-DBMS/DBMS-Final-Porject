@@ -15,10 +15,14 @@ interface RegisterRequest extends LoginRequest {
   username: string;
 }
 
+interface ChangePasswordRequest {
+  password: string;
+  new_password: string;
+}
+
 export const authController = {
   login: async (req: Request<{}, {}, LoginRequest>, res: Response) => {
     try {
-      console.log('Login attempt:', req.body);
       const { email, password } = req.body;
       const user = await prisma.user.findUnique({
         where: { email }
@@ -130,6 +134,42 @@ export const authController = {
       res.json({ user });
     } catch (error) {
       console.error('Get profile error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  changePassword: async (req: Request & { user?: { userId: string } }, res: Response) => {
+    try {
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+      const { password, new_password } = req.body as ChangePasswordRequest;
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.userId }
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: '用戶不存在！' });
+      }
+      const isValidPassword = await bcrypt.compare(password, user.password);
+
+      if (!isValidPassword) {
+        return res.status(400).json({ message: '當前密碼不正確！' });
+      }
+
+      if (password==new_password) {
+        return res.status(400).json({ message: '新舊密碼一致！' });
+      }
+      const hashedNewPassword = await bcrypt.hash(new_password, 10);
+
+      await prisma.user.update({
+        where: { id: req.user.userId },
+        data: { password: hashedNewPassword }
+      });
+
+      res.json({ message: '密碼修改成功' });
+    } catch (error) {
+      console.error('Change password error:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   }
