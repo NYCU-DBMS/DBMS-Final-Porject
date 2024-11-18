@@ -6,8 +6,6 @@ export default function NavBar() {
 			<nav>
 				<div className='flex gap-10 justify-center items-center border-b-[1px] h-14'>
 					<Link to="/">Home</Link>
-					<Link to="/login">Login</Link>
-					<Link to="/logout">Logout</Link>
 					<Link to="/favorites">Favorites</Link>
 				</div>
 			</nav>
