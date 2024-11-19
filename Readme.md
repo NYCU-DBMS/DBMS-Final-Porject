@@ -50,3 +50,9 @@ INSERT INTO Users (id, username, email, password)
 VALUES (UUID(), 'admin', 'admin', '$2a$10$rD872rosLum4f6TsXtkC6e0H40.7g6YMlqfkKMlLNg6E0rXB3wPZK');
 select * from Users;
 ```
+
+後端的.env設置：
+```bash
+DATABASE_URL="mysql://username:userpassword@localhost:3306/dbms_final"
+JWT_SECRET="8d1f3b8b9c7e4a6d2f5h8j9k4m3n6p7q1r5s8t2v4w7x9y3z6a1c4e7g9i2l5o8"
+```
