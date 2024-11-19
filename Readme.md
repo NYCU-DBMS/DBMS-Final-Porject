@@ -27,3 +27,26 @@ npm install
 npm run dev
 ```
 
+### DataBase
+建立資料庫：
+```sql
+CREATE DATABASE IF NOT EXISTS dbms_final;
+USE dbms_final;
+
+CREATE TABLE Users (
+    id VARCHAR(36) PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+新增一個管理員帳號 (暫無特權) ：
+```sql
+use dbms_final;
+INSERT INTO Users (id, username, email, password) 
+VALUES (UUID(), 'admin', 'admin', '$2a$10$rD872rosLum4f6TsXtkC6e0H40.7g6YMlqfkKMlLNg6E0rXB3wPZK');
+select * from Users;
+```
