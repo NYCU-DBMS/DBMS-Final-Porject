@@ -56,3 +56,22 @@ select * from Users;
 DATABASE_URL="mysql://username:userpassword@localhost:3306/dbms_final"
 JWT_SECRET="8d1f3b8b9c7e4a6d2f5h8j9k4m3n6p7q1r5s8t2v4w7x9y3z6a1c4e7g9i2l5o8"
 ```
+
+### Api請求格式
+### 登入:
+http://localhost:8000/api/auth/login
+![image](https://github.com/user-attachments/assets/9f8dcd1c-deea-44d7-86f4-3f08c5e1e35e)
+### 註冊:
+http://localhost:8000/api/auth/register
+![image](https://github.com/user-attachments/assets/1fc430e9-0a50-41b6-aa13-5a6fbbe66508)
+### 更改密碼 (要先設置Headers):
+http://localhost:8000/api/auth/change-password
+```bash
+Authorization: Bearer {登入或註冊時得到的token}
+Content-Type: application/json
+```
+![image](https://github.com/user-attachments/assets/ba29f7a5-428d-45b1-ba13-a7d8264dec27)
+![image](https://github.com/user-attachments/assets/dd703c03-7efc-4f15-9cdc-619be62ae6d7)
+
+
+
