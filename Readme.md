@@ -35,10 +35,9 @@ npm install
 npm run dev
 ```
 
-<<<<<<< HEAD
 (可以到http://localhost:8000/dbtest/connection 看有沒有連上資料庫)
 (接著到http://localhost:8000/dbinit/importCSV 把CSV資料灌進資料庫，要等一段時間)
-=======
+
 ### DataBase
 建立資料庫：
 ```sql
@@ -85,6 +84,5 @@ Content-Type: application/json
 ![image](https://github.com/user-attachments/assets/ba29f7a5-428d-45b1-ba13-a7d8264dec27)
 ![image](https://github.com/user-attachments/assets/dd703c03-7efc-4f15-9cdc-619be62ae6d7)
 
->>>>>>> 765c92671924dbeb417470f4882ae3e77ba2be1a
 
 
