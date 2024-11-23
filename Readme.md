@@ -14,16 +14,28 @@ npm run dev
 
 ### Backend
 
-撰寫時請統一使用小駝峰命名函數
+先從kaggle下載資料
+然後把csv檔放到data資料夾底下(final_animedataset.csv不用)
+接著執行./data_preprocess/csv_preprocess.py
+之後把處理過的資料(就是data的那一批)放到 C:\\Program Files\\PostgreSQL\\16\\data 底下
 
 請先安裝PostgreSQL 16.4，option都照預設就好
 選application時，選Web Devlopment的2.4.58-2
-然後進去PGAdmin在PostgreSQL 16的server上面創一個test的資料庫
-(可以到http://localhost:8000/dbtest/connection看有沒有連上)
+然後進去PGAdmin在PostgreSQL 16的postgres server按connect to server
+接著創建Backend/.env，裡面輸入以下:
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=*** (當初建資料庫的時候設的密碼)
+DB_DATABASE=postgres
 
 ```bash
 cd Backend
 npm install
 npm run dev
 ```
+
+(可以到http://localhost:8000/dbtest/connection 看有沒有連上資料庫)
+(接著到http://localhost:8000/dbinit/importCSV 把CSV資料灌進資料庫，要等一段時間)
+
 

@@ -17,7 +17,7 @@ const pool = new Pool({ // manager of connection, will init several connection t
 // each query will acquire a connection automatically (each query may in different connection)
 export const query = (text: any, params: any) => pool.query(text, params);
 
-
+/*
 export const processCSVHeaders = (inputPath: string, outputPath: string) => {
   console.log(`Processing ${inputPath}`);
 
@@ -51,7 +51,49 @@ export const processCSVHeaders = (inputPath: string, outputPath: string) => {
   rl.on('error', (err) => {
     console.error('Error processing file:', err);
   });
-};
+};*/
+
+const parseCsvFile = (client: any, filePath: string, tableName: string, columns: Array<string>, columnTypes: Array<string>): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const promises: Array<Promise<any>> = []; // 存储每行的插入操作
+    const batch: Array<string> = []; // 用于存储当前批次的 SQL 插入语句
+    let idx = 0
+    fs.createReadStream(filePath, {highWaterMark: 256}) // create file string to analyze csv data
+    .pipe(csvParser())
+    .on('data', (row) => {
+      idx++;
+      // console.log('row: ', idx);
+      const values = columns.map((col) => {
+        const value = row[col];
+      
+        // 檢查 row[col] 是否為 undefined 或 null
+        if (value === undefined || value === null || value === 'Unknown' || value === 'UNKNOWN' || value === '') {
+          return "NULL"; // 如果值是 undefined 或 null，使用 SQL 中的 NULL
+        } else if (typeof value === 'string') {
+          // 處理字符串，轉義單引號
+          return `'${value.replace(/'/g, "''")}'`;
+        } else {
+          // 如果是數字或其他類型，直接返回該值
+          return value;
+        }
+      }).join(', '); // 使用逗號分隔每個處理過的值
+
+      const queryText = `
+      INSERT INTO ${tableName} ("${columns.join('", "')}")
+      VALUES (${values})
+      `;
+      client.query(queryText); // 每次插入数据时，存储到 promises 中
+    })
+    .on('end', async () => {
+      console.log(`${tableName}: Analysis end. There are ${idx} rows`);
+      resolve('')
+    })
+    .on('error', (err) => {
+      console.error('Error while parsing CSV file:', err);
+      reject(err); // 解析失败，抛出错误
+    });
+  });
+}
 
 // 導入 CSV
 export const importCsvToDb = async (filePath: string, tableName: string, columns: Array<string>, columnTypes: Array<string>) => {
@@ -61,54 +103,43 @@ export const importCsvToDb = async (filePath: string, tableName: string, columns
     await client.query('BEGIN'); // BEGIN可以保證接下來的操作同時成功or失敗，如果中途失敗，就會復原前面的操作
     console.log(`Begin importing ${filePath} to ${tableName}...`);
 
-    const rows: any = [];
-    fs.createReadStream(filePath) // create file string to analyze csv data
-      .pipe(csvParser())
-      .on('data', (row) => {
-        rows.push(row); // push row to rows object (類似pyhton的dictionary)
-      })
-      .on('end', async () => {
-        console.log(`${tableName}: Analysis end. There are ${rows.length} rows`);
-      
-        const checkTableQuery = `
-          SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.tables 
-            WHERE table_name = $1
-          );
-        `;
+    const checkTableQuery = `
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.tables 
+        WHERE table_name = $1
+      );
+    `;
 
-        const res = await pool.query(checkTableQuery, [tableName]);
+    const res = await client.query(checkTableQuery, [tableName]);
 
-        if (res.rows[0].exists) {
-          console.log(`${tableName}: Table "${tableName}" already exists. Stopping function.`);
-          return;  // 表格存在，停止執行
-        }
-        else{
-          console.log(`${tableName}: Table "${tableName}" not exists.`);
-        }
+    if (res.rows[0].exists) {
+      console.log(`${tableName}: Table "${tableName}" already exists. Stopping function.`);
+      return;  // 表格存在，停止執行
+    }
+    else{
+      console.log(`${tableName}: Table "${tableName}" not exists.`);
+    }
 
-        const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS ${tableName} (
-          ${columns.map((col, idx) => `"${col}" ${columnTypes[idx]}`).join(', \n')}
-        );`;
-        // console.log(createTableQuery)
-        await client.query(createTableQuery);
-        console.log(`${tableName}: Table ${tableName} created`);
+    const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS ${tableName} (
+      ${columns.map((col, idx) => `"${col}" ${columnTypes[idx]}`).join(', \n')}
+    );`;
+    await client.query(createTableQuery);
+    console.log(`${tableName}: Table ${tableName} created`);
 
-        for (const row of rows) {
-          // map: 對陣列中的每個元素都做一次函數(類似python的lambda)
-          const values = columns.map((col) => `'${row[col].replace(/'/g, "''")}'`).join(', '); // 為每個值加引號，再值之間插逗號，用來符合SQL value語法
-          const queryText = `
-          INSERT INTO ${tableName} (${columns.join(', ')})
-          VALUES (${values})
-          `;
-          await client.query(queryText);
-        }
-      
-        await client.query('COMMIT'); // COMMIT上去，BEGIN到COMMIT之間的SQL操作才會生效
-        console.log(`${tableName}: Import CSV successfully`);
-      });
+    // const _ = await parseCsvFile(client, filePath, tableName, columns, columnTypes)
+
+    const copyCSVQuery = `
+      COPY ${tableName}
+      FROM '${filePath}'
+      WITH (FORMAT CSV, HEADER, NULL '');
+    `;
+    await client.query(copyCSVQuery);
+
+    await client.query('COMMIT'); // COMMIT上去，BEGIN到COMMIT之間的SQL操作才會生效
+    console.log(`${tableName}: Import CSV successfully`);
+
   } catch (err) {
     // 發生錯誤時回滾事務
     await client.query('ROLLBACK');

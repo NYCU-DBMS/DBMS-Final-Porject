@@ -4,13 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon & node --max-old-space-size=8192 ./dist/ds.js "
+    "dev": "nodemon"
   },
   "nodemonConfig": {
     "watch": [
       "src"
     ],
-    "exec": "tsc && node ./dist/index.js",
+    "exec": "tsc && node --max-old-space-size=8192 ./dist/index.js",
     "ext": "ts,js,json"
   },
   "keywords": [],
