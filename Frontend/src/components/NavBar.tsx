@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { User, LogOut, UserCircle } from 'lucide-react'
 import { Link } from "react-router-dom"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface NavbarProps {
   isLoggedIn: boolean
@@ -17,10 +11,12 @@ interface NavbarProps {
 
 export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) {
   return (
-    <nav className="w-full border-b">
-      <div className="flex h-16 items-center px-4">
+    <nav className="w-full border-b z-50">
+      <div className="flex h-16 items-center px-4 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"> 
         <div className="flex-1">
-          <h2 className="text-xl font-bold">Anime Helper</h2>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h2 className="text-xl font-bold">Anime Helper</h2>
+          </Link>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -38,9 +34,13 @@ export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) 
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-5 w-5" />
-                  <span>Profile</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/Profile" className="w-full">
+                    <div className="flex items-center">
+                      <User className="mr-2 h-5 w-5" />
+                      <span>Profile</span>
+                    </div>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onLogout}>
                   <LogOut className="mr-2 h-5 w-5" />
