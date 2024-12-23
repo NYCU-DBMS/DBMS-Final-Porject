@@ -17,42 +17,6 @@ const pool = new Pool({ // manager of connection, will init several connection t
 // each query will acquire a connection automatically (each query may in different connection)
 export const query = (text: any, params: any) => pool.query(text, params);
 
-/*
-export const processCSVHeaders = (inputPath: string, outputPath: string) => {
-  console.log(`Processing ${inputPath}`);
-
-  const readStream = fs.createReadStream(inputPath, 'utf8');
-  const writeStream = fs.createWriteStream(outputPath, 'utf8');
-
-  const rl = readline.createInterface({
-    input: readStream,
-    output: writeStream,
-    terminal: false
-  });
-
-  let isFirstLine = true;
-
-  rl.on('line', (line) => {
-    if (isFirstLine) {
-      // 處理表頭（第一行）
-      const newHeader = line.replace(/ /g, '_'); // 替換空格為下劃線
-      writeStream.write(newHeader + '\n'); // 寫入修改過的表頭
-      isFirstLine = false; // 已經處理過表頭
-    } else {
-      // 直接寫入其他行
-      writeStream.write(line + '\n');
-    }
-  });
-
-  rl.on('close', () => {
-    console.log('CSV header processed successfully!');
-  });
-
-  rl.on('error', (err) => {
-    console.error('Error processing file:', err);
-  });
-};*/
-
 const parseCsvFile = (client: any, filePath: string, tableName: string, columns: Array<string>, columnTypes: Array<string>): Promise<any> => {
   return new Promise((resolve, reject) => {
     const promises: Array<Promise<any>> = []; // 存储每行的插入操作
