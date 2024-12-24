@@ -41,7 +41,7 @@ router.get('/importCSV', async  (req: any, res: any) => {
             'Ranked', 'Popularity', 'Members', 'Favorites', 'Watching', 'Completed', 'On_Hold', 'Dropped'
         ]
         columnTypes = ['INTEGER', 'VARCHAR(255)', 'DECIMAL(3,2)', 'VARCHAR(255)', 'VARCHAR(255)', 'VARCHAR(255)',
-            'TEXT', 'VARCHAR(50)', 'INTEGER', 'VARCHAR(50)', 'VARCHAR(50)', 'TEXT', 'TEXT', 'TEXT', 'VARCHAR(50)',
+            'TEXT', 'VARCHAR(50)', 'FLOAT', 'VARCHAR(50)', 'VARCHAR(50)', 'TEXT', 'TEXT', 'TEXT', 'VARCHAR(50)',
             'VARCHAR(50)', 'VARCHAR(50)', 'FLOAT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER',
             'INTEGER'
         ]
