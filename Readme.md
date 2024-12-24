@@ -15,7 +15,7 @@ npm run dev
 ### Backend
 
 先從kaggle下載資料
-然後把csv檔放到data資料夾底下(final_animedataset.csv不用)
+然後把csv檔放到data資料夾底下
 接著執行./data_preprocess/csv_preprocess.py
 之後把處理過的資料(就是data的那一批)放到 C:\\Program Files\\PostgreSQL\\16\\data 底下
 
