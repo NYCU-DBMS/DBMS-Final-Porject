@@ -7,6 +7,7 @@ export default function NavBar() {
         <div className='flex gap-10 justify-center items-center border-b-[1px] border-gray-600 h-14'>
           <Link to="/" className="text-white hover:text-blue-300 transition-colors">Home</Link>
           <Link to="/favorites" className="text-white hover:text-blue-300 transition-colors">Favorites</Link>
+          <Link to="/anime/1" className="text-white hover:text-blue-300 transition-colors">Anime 1</Link>
         </div>
       </nav>
     </div>

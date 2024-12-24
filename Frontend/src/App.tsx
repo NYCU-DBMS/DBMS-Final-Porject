@@ -8,6 +8,7 @@ import NavBar from './components/NavBar';
 import Links from './components/Links';
 import toast, { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AnimePage from './pages/AnimePage';
 
 const AppContent = () => {
   const { user, logout, isLoading } = useAuth();
@@ -67,6 +68,7 @@ const AppContent = () => {
               user ? <Profile /> : <Navigate to="/login" replace />
             }
           />
+          <Route path='/anime/:id' element={<AnimePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
