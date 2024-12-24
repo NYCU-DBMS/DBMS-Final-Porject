@@ -1,13 +1,7 @@
 import { create } from 'zustand';
 
-interface User {
-  id: string;
-  name: string;
-  password: string;
-}
-
 interface Anime {
-  id: string;
+  id: number;
   Name: string;
   Score: number;
   Category: string[];
@@ -17,44 +11,20 @@ interface Anime {
   AirDate: string;
   EndDate?: string;
   Image_URL: string;
+
+  setAnimeIds: (ids: number[]) => void;
 }
 
-
-interface AnimeStoreState {
-  user: User | null;
-  favoriteList: Anime[];
+interface AnimeStore {
   currentAnime: Anime | null;
-  setUser: (user: User | null) => void;
-  addFavorite: (anime: Anime) => void;
-  removeFavorite: (animeId: string) => void;
-  clearFavorites: () => void;
-  fetchAnime: (id: string) => Promise<void>; // Fetch animation by ID
+  setCurrentAnime: (anime: Anime) => void;
+  animes: Anime[];
+  setAnimes: (animes: Anime[]) => void;
 }
 
-export const useAnimeStore = create<AnimeStoreState>((set) => ({
-  user: null,
-  favoriteList: [],
+export const useAnimeStore = create<AnimeStore>((set) => ({
   currentAnime: null,
-  setUser: (user) => set({ user }),
-  addFavorite: (anime) =>
-    set((state) => {
-      if (!state.favoriteList.find((fav) => fav.id === anime.id)) {
-        return { favoriteList: [...state.favoriteList, anime] };
-      }
-      return state;
-    }),
-  removeFavorite: (animeId) =>
-    set((state) => ({
-      favoriteList: state.favoriteList.filter((anime) => anime.id !== animeId),
-    })),
-  clearFavorites: () => set({ favoriteList: [] }),
-  fetchAnime: async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/anime/${id}`);
-      const data = await response.json();
-      set({ currentAnime: data });
-    } catch (error) {
-      console.error("Failed to fetch anime data:", error);
-    }
-  },
+  setCurrentAnime: (currentAnime: Anime) => set({ currentAnime }),
+  animes: [],
+  setAnimes: (animes: Anime[]) => set({ animes }),
 }));
