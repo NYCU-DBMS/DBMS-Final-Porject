@@ -5,6 +5,7 @@ import db_init from './db_init';  // 移除 .js
 import { authRoutes } from './routes/authRoutes';  // 移除 .js 並使用具名導入
 import { animeRoutes } from './routes/animeRoutes';  //anime api
 import { categoryRoutes } from './routes/categoryRoutes'; //category api
+import { loginregRoutes } from './routes/loginregRoutes'; //login register modify account api
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -36,7 +37,7 @@ app.get("/", (req, res) => {
 });
 
 // API 路由
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', loginregRoutes);
 app.use('/dbtest', db_test);
 app.use('/dbinit', db_init);
 app.use('/api/anime', animeRoutes);
