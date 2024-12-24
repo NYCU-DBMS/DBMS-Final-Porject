@@ -23,11 +23,13 @@ npm run dev
 選application時，選Web Devlopment的2.4.58-2
 然後進去PGAdmin在PostgreSQL 16的postgres server按connect to server
 接著創建Backend/.env，裡面輸入以下:
+```bash
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=*** (當初建資料庫的時候設的密碼)
 DB_DATABASE=postgres
+```
 
 ```bash
 cd Backend
