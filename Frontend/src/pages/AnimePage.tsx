@@ -1,29 +1,32 @@
-import { useAnimeStore } from "@/store"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { fetchAnime } from "@/fetchAPI/fetchAnime"
+import { fetchAnimeById } from "@/fetchAPI/fetchAnime"
+import AnimeImage from "@/components/AnimeImage"
 
+interface Anime {
+  Name: string
+  Score: number
+  Description: string
+  Type: string
+  Episodes: number
+}
 
 export default function AnimePage() {
-
   const { id } = useParams<{id: string}>()
   const numberId = Number(id)
-  const { currentAnime, setCurrentAnime } = useAnimeStore()
-
+  const [currentAnime, setCurrentAnime] = useState<Anime>()
   useEffect(() => {
     const fetchAndSetAnime = async () => {
-      if (id) setCurrentAnime(await fetchAnime(id))
+      if (id) setCurrentAnime(await fetchAnimeById(numberId))
     }
     fetchAndSetAnime()
-  }, [id, fetchAnime])
-
-  if (!currentAnime) return <div>Loading...</div>
-
+  }, [id, fetchAnimeById])
   console.log(currentAnime)
   
+  if (!currentAnime) return <div>Loading...</div>
   return (
     <div className="flex items-center p-10 w-screen">
-      <img src={currentAnime.Image_URL} alt={currentAnime.Name} className="w-[20%] max-h-screen max-w-full object-contain"/>
+      <AnimeImage animeId={numberId} />
       <div className="flex flex-col mx-10 gap-3">
         <h2><b>id: </b>{numberId}</h2>
         <h2><b>Anime name:</b> {currentAnime.Name}</h2>

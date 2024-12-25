@@ -16,15 +16,11 @@ interface Anime {
 }
 
 interface AnimeStore {
-  currentAnime: Anime | null;
-  setCurrentAnime: (anime: Anime) => void;
   animes: Anime[];
   setAnimes: (animes: Anime[]) => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set) => ({
-  currentAnime: null,
-  setCurrentAnime: (currentAnime: Anime) => set({ currentAnime }),
   animes: [],
   setAnimes: (animes: Anime[]) => set({ animes }),
 }));
