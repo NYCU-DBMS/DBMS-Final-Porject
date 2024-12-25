@@ -51,10 +51,24 @@ router.get('/all', async (req, res) => {
             sortMethod = '"Score" DESC';
             break;
         case 'year_asc':
-            sortMethod =  '"Aired" ASC';
+            sortMethod =  
+            `
+                WHERE "Aired" IS NOT NULL
+                CASE 
+                    WHEN \"Aired\" = \'Not available\' THEN 10000
+                    ELSE 10001 
+                END DESC\, 
+                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
             break;
         case 'year_desc':
-            sortMethod = '"Aired" DESC';;
+            sortMethod =  
+            `
+                WHERE "Aired" IS NOT NULL
+                CASE 
+                    WHEN \"Aired\" = \'Not available\' THEN 1
+                    ELSE 0 
+                END ASC\, 
+                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
             break;
         default:
             return res.status(400).json({ error: 'Invalid sort type' });
@@ -111,8 +125,8 @@ router.get('/:id(\\d+)', async (req, res) => {
             Description,
             Type,
             Episodes: Episodes || -1,
-            'Air Date': startDate,
-            'End Date': endDate,
+            'Air_Date': startDate,
+            'End_Date': endDate,
             Image_URL,
         });
     }
@@ -123,3 +137,45 @@ router.get('/:id(\\d+)', async (req, res) => {
 });
 
 export const animeRoutes = router; 
+
+/*
+SET client_encoding TO 'UTF8';
+
+SELECT "Name", "Aired"
+FROM anime_data
+ORDER BY 
+    CASE 
+        WHEN "Aired" = 'Not available' THEN 1
+        ELSE 0
+    END ASC,
+    CAST(substring("Aired" FROM '(\d{4})') AS INT) DESC;
+
+SELECT "Name", "Aired"
+FROM anime_data
+ORDER BY 
+    CASE 
+        WHEN "Aired" = 'Not available' THEN 10000
+        ELSE 10001
+    END DESC,
+    CAST(substring("Aired" FROM '(\d{4})') AS INT) ASC;
+
+SELECT "anime_id", "Aired"
+FROM anime_data
+ORDER BY 
+    CASE 
+        WHEN "Aired" = 'Not available' THEN 1
+        ELSE 0
+    END ASC,
+    CAST(substring("Aired" FROM '(\d{4})') AS INT) DESC;
+
+
+SELECT "anime_id", "Aired"
+FROM anime_data
+ORDER BY 
+    CASE 
+        WHEN "Aired" = 'Not available' THEN 10000
+        ELSE 10001
+    END DESC,
+    CAST(substring("Aired" FROM '(\d{4})') AS INT) ASC;
+
+*/

@@ -6,9 +6,13 @@ import AnimeImage from "@/components/AnimeImage"
 interface Anime {
   Name: string
   Score: number
+  Category: string[]
   Description: string
   Type: string
   Episodes: number
+  Air_Date: string
+  End_Date: string
+  Image_URL: string
 }
 
 export default function AnimePage() {
@@ -28,12 +32,15 @@ export default function AnimePage() {
     <div className="flex items-center p-10 w-screen">
       <AnimeImage animeId={numberId} />
       <div className="flex flex-col mx-10 gap-3">
-        <h2><b>id: </b>{numberId}</h2>
-        <h2><b>Anime name:</b> {currentAnime.Name}</h2>
+        <h2><b>Id: </b>{numberId}</h2>
+        <h2><b>Name:</b> {currentAnime.Name}</h2>
         <p><strong>Score:</strong> {currentAnime.Score}</p>
+        <p><strong>Category: </strong>{currentAnime.Category}</p>
         <p><strong>Description:</strong> {currentAnime.Description}</p>
         <p><strong>Type:</strong> {currentAnime.Type}</p>
         <p><strong>Episodes:</strong> {currentAnime.Episodes === -1 ? "Ongoing" : currentAnime.Episodes}</p>
+        <p><strong>Air Date:</strong> {currentAnime.Air_Date}</p>
+        <p><strong>End Date:</strong> {currentAnime.End_Date === "?" ? "Not yet ended" : currentAnime.End_Date}</p>
       </div>
     </div>
   )
