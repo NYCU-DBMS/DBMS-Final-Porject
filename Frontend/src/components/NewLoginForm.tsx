@@ -1,13 +1,13 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => void
-  onSwitchToRegister: () => void
+  onSwitchToRegister: () => void 
 }
 
-export default function NewLoginForm({ onSubmit, onSwitchToRegister }: LoginFormProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+export const NewLoginForm = ({ onSubmit, onSwitchToRegister }: LoginFormProps) => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -15,52 +15,57 @@ export default function NewLoginForm({ onSubmit, onSwitchToRegister }: LoginForm
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-    >
-      <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required
-        />
-      </div>
-      <div className="mb-6">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required
-        />
-      </div>
-      <div className="flex items-center justify-between">
+    <div className='flex justify-center items-center'>
+      <form onSubmit={handleSubmit} className="space-y-6 bg-[#1a1a1a] p-8 rounded-xl shadow-lg overflow-auto">
+        <h2 className="text-2xl font-bold text-white mb-6">SIGN IN</h2>
+        
+        <div className="space-y-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+            Email
+          </label>
+          <input
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+            required
+            />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+            required
+            />
+        </div>
+
         <button
           type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Login
+          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+          >
+          Sign In
         </button>
-        <button
-          type="button"
-          onClick={onSwitchToRegister}
-          className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-        >
-          Create an Account
-        </button>
-      </div>
-    </form>
+
+        <div className="text-center mt-4">
+          <p className="text-gray-400">
+            Don't have an account?{' '}
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              className="text-blue-500 hover:text-blue-400 transition duration-200"
+              >
+              Register here
+            </button>
+          </p>
+        </div>
+      </form>
+    </div>
   )
 }

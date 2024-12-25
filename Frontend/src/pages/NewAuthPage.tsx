@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import LoginForm from '../components/LoginForm'
-import { RegisterForm } from '../components/RegisterForm'
 import { useAuth } from '../contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
+import { NewLoginForm } from '@/components/NewLoginForm'
+import { NewRegisterForm } from '@/components/NewRegisterForm'
 
 export default function NewAuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -78,14 +78,14 @@ export default function NewAuthPage() {
       <div className="w-full max-w-md">
         {isLogin ? (
           <>
-            <LoginForm 
+            <NewLoginForm
               onSubmit={handleLogin} 
               onSwitchToRegister={() => setIsLogin(false)} 
             />
           </>
         ) : (
           <>
-            <RegisterForm 
+            <NewRegisterForm
               onSubmit={handleRegister}
               onSwitchToLogin={() => setIsLogin(true)} 
             />
