@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { fetchAnimeById } from "@/fetchAPI/fetchAnime"
+import { fetchAnimeById } from "@/api/anime"
 
 interface AnimeImageProps {
   animeId: number

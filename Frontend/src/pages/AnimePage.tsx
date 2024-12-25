@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { fetchAnimeById } from "@/fetchAPI/fetchAnime"
+import { fetchAnimeById } from "@/api/anime"
 import AnimeImage from "@/components/AnimeImage"
 
 interface Anime {

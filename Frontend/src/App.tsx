@@ -9,6 +9,7 @@ import Links from './components/Links';
 import toast, { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AnimePage from './pages/AnimePage';
+import NewAuthPage from './pages/NewAuthPage';
 
 const AppContent = () => {
   const { user, logout, isLoading } = useAuth();
@@ -56,6 +57,8 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/new_login" element={<NewAuthPage />} />
+          <Route path="/new_register" element={<NewAuthPage />} />
           <Route
             path="/favorites"
             element={
