@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 
 
 export default function HomeComponent() {
-  const [sort, setSort] = useState("score_asc")
+  const [sort, setSort] = useState("score_desc")
   const [search, setSearch] = useState("")
   const [animeIds, setAnimeIds] = useState<number[]>([])
   const handleSubmit = async () => {
@@ -35,10 +35,10 @@ export default function HomeComponent() {
             className="w-full"
           />
           <select name="sort" id="sort" className="dark:bg-gray-800 rounded-sm" onChange={(e) => setSort(e.target.value)}>
-            <option value="score_asc">score_asc</option>
             <option value="score_desc">score_desc</option>
-            <option value="year_asc">year_asc</option>
+            <option value="score_asc">score_asc</option>
             <option value="year_desc">year_desc</option>
+            <option value="year_asc">year_asc</option>
           </select>
           <Button className="theme--dark" onClick={handleSubmit}>submit</Button>
         </div>
