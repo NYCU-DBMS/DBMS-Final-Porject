@@ -1,23 +1,29 @@
-import { useAnimeStore } from "@/store"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { fetchAnimeById } from "@/fetchAPI/fetchAnime"
 import AnimeImage from "@/components/AnimeImage"
 
+interface Anime {
+  Name: string
+  Score: number
+  Description: string
+  Type: string
+  Episodes: number
+}
 
 export default function AnimePage() {
-
-  const { currentAnime, setCurrentAnime } = useAnimeStore()
   const { id } = useParams<{id: string}>()
   const numberId = Number(id)
+  const [currentAnime, setCurrentAnime] = useState<Anime>()
   useEffect(() => {
     const fetchAndSetAnime = async () => {
       if (id) setCurrentAnime(await fetchAnimeById(numberId))
     }
     fetchAndSetAnime()
   }, [id, fetchAnimeById])
+  console.log(currentAnime)
   
-  if (!currentAnime) return <div>No anime found</div>
+  if (!currentAnime) return <div>Loading...</div>
   return (
     <div className="flex items-center p-10 w-screen">
       <AnimeImage animeId={numberId} />

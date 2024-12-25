@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import AnimeImage from "./AnimeImage"
 import { useEffect, useState } from "react"
 
@@ -18,7 +19,9 @@ export default function AnimeGallery({ animeIds }: AnimeGalleryProps) {
       {
         currAnimeIds.map((id) => (
           <div key={id} className="flex flex-col items-center">
-            <AnimeImage animeId={id} />
+            <Link to={`/anime/${id}`}>
+              <AnimeImage animeId={id} />
+            </Link>
           </div>
         ))
       }
