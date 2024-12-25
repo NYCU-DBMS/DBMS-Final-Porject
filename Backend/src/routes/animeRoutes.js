@@ -53,6 +53,7 @@ router.get('/all', async (req, res) => {
         case 'year_asc':
             sortMethod =  
             `
+                WHERE "Aired" IS NOT NULL
                 CASE 
                     WHEN \"Aired\" = \'Not available\' THEN 10000
                     ELSE 10001 
@@ -62,6 +63,7 @@ router.get('/all', async (req, res) => {
         case 'year_desc':
             sortMethod =  
             `
+                WHERE "Aired" IS NOT NULL
                 CASE 
                     WHEN \"Aired\" = \'Not available\' THEN 1
                     ELSE 0 
@@ -123,8 +125,8 @@ router.get('/:id(\\d+)', async (req, res) => {
             Description,
             Type,
             Episodes: Episodes || -1,
-            'Air Date': startDate,
-            'End Date': endDate,
+            'Air_Date': startDate,
+            'End_Date': endDate,
             Image_URL,
         });
     }
