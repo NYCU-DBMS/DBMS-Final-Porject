@@ -73,7 +73,7 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="m-10 flex items-center justify-center">
       <Toaster />
       <div className="w-full max-w-md">
         {isLogin ? (
