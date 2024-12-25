@@ -69,7 +69,6 @@ export const useAuthStore = create<AuthState>((set) => ({
           email: user.email,
           token: '', // 根據需求設置
         },
-        isLoggedIn: true,
       })
     } catch (error) {
       throw error
