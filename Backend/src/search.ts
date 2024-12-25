@@ -51,9 +51,9 @@ router.get('/Soft', async  (req: any, res: any) => {
 
         let sortBy, sortOrder;
         if(sort == 'score_asc')
-            sortBy = "Score", sortOrder = "ASC";
+            sortBy = "COALESCE(\"Score\", 0)", sortOrder = "ASC";
         else if(sort == 'score_desc')
-            sortBy = "Score", sortOrder = "DESC";
+            sortBy = "COALESCE(\"Score\", 0)", sortOrder = "DESC";
         else if(sort == 'year_asc'){
             // "Apr 3, 1998 to Apr 24, 1999" 或是 "Dec 21, 2012" -> Apr 3, 1998 按照 Mon DD, YYYY的format轉成日期
             sortBy = `
@@ -76,7 +76,7 @@ router.get('/Soft', async  (req: any, res: any) => {
             sortOrder = "DESC";
         }
         const searchSQL = `
-            SELECT anime_id, "Name", "Aired"
+            SELECT anime_id, "Name", "Score"
             FROM anime_data_filtered
             WHERE "Name" ILIKE '%${keyword}%' AND "Aired" ~ '^\\w{3} \\d{1,2}, \\d{4}'
             ORDER BY ${sortBy} ${sortOrder};
@@ -84,6 +84,7 @@ router.get('/Soft', async  (req: any, res: any) => {
         let result: QueryResult;
         try{
             result = await query(searchSQL, []);
+            console.log(result);
         } catch (error){
             console.error("search/Soft: Serch SQL error");
             console.error(error)
