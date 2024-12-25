@@ -6,30 +6,15 @@ const router = express.Router();
 
 router.get('/Hard', async  (req: any, res: any) => {
     try {
-        const {keyword, sort} = req.query
-        if(!keyword || !sort){
+        const {keyword} = req.query
+        if(!keyword){
             return res.status(400).json({error: "search/Hard: No keyword or sort"});
         }
 
-        if (sort != 'score_asc' && sort != "score_desc" && sort != "year_asc" && sort != "year_desc"){
-            return res.status(400).json({error: "search/Hard: sort format error!!!"});
-        }
-
-        let sort_by, sort_order;
-        if(sort == 'score_asc')
-            sort_by = "Score", sort_order = "ASC";
-        else if(sort == 'score_desc')
-            sort_by = "Score", sort_order = "DESC";
-        else if(sort == 'year_asc')
-            // Apr 3, 1998 to Apr 24, 1999 -> Apr 3, 1998 按照 Mon DD, YYYY的format轉成日期
-            sort_by = "TO_DATE(SUBSTRING(Aired FROM '^(.+) to'), 'Mon DD, YYYY')", sort_order = "ASC";
-        else if(sort == 'year_desc')
-            sort_by = "TO_DATE(SUBSTRING(Aired FROM '^(.+) to'), 'Mon DD, YYYY')", sort_order = "DESC";
         const searchSQL = `
             SELECT anime_id
             FROM anime_data_filtered
-            WHERE "Name" LIKE '${keyword}'
-            ORDER BY "${sort_by}" ${sort_order};
+            WHERE "Name" ILIKE '${keyword}'
         `
         let result: QueryResult;
         try{
@@ -69,16 +54,32 @@ router.get('/Soft', async  (req: any, res: any) => {
             sortBy = "Score", sortOrder = "ASC";
         else if(sort == 'score_desc')
             sortBy = "Score", sortOrder = "DESC";
-        else if(sort == 'year_asc')
-            // Apr 3, 1998 to Apr 24, 1999 -> Apr 3, 1998 按照 Mon DD, YYYY的format轉成日期
-            sortBy = "TO_DATE(SUBSTRING(Aired FROM '^(.+) to'), 'Mon DD, YYYY')", sortOrder = "ASC";
-        else if(sort == 'year_desc')
-            sortBy = "TO_DATE(SUBSTRING(Aired FROM '^(.+) to'), 'Mon DD, YYYY')", sortOrder = "DESC";
+        else if(sort == 'year_asc'){
+            // "Apr 3, 1998 to Apr 24, 1999" 或是 "Dec 21, 2012" -> Apr 3, 1998 按照 Mon DD, YYYY的format轉成日期
+            sortBy = `
+                CASE 
+                    WHEN "Aired" ~ ' to ' THEN TO_DATE(SUBSTRING("Aired" FROM '^(.+) to'), 'Mon DD, YYYY')
+                    WHEN "Aired" ~ ', ' THEN TO_DATE("Aired", 'Mon DD, YYYY')
+                    ELSE TO_DATE('Jan 1, ' || "Aired", 'Mon DD, YYYY')
+                END
+            `;
+            sortOrder = "ASC";
+        }
+        else if(sort == 'year_desc'){
+            sortBy = `
+                CASE 
+                    WHEN "Aired" ~ ' to ' THEN TO_DATE(SUBSTRING("Aired" FROM '^(.+) to'), 'Mon DD, YYYY')
+                    WHEN "Aired" ~ ', ' THEN TO_DATE("Aired", 'Mon DD, YYYY')
+                    ELSE TO_DATE('Jan 1, ' || "Aired", 'Mon DD, YYYY')
+                END
+            `; 
+            sortOrder = "DESC";
+        }
         const searchSQL = `
-            SELECT anime_id, "Name"
+            SELECT anime_id, "Name", "Aired"
             FROM anime_data_filtered
-            WHERE "Name" LIKE '%${keyword}%'
-            ORDER BY "${sortBy}" ${sortOrder};
+            WHERE "Name" ILIKE '%${keyword}%' AND "Aired" ~ '^\\w{3} \\d{1,2}, \\d{4}'
+            ORDER BY ${sortBy} ${sortOrder};
         `
         let result: QueryResult;
         try{
