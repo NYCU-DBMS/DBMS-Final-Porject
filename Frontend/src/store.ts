@@ -1,41 +1,26 @@
 import { create } from 'zustand';
 
-interface User {
-  id: string;
-  name: string;
-  password: string;
-}
-
 interface Anime {
-  id: string;
-  title: string;
-  imageUrl: string;
+  id: number;
+  Name: string;
+  Score: number;
+  Category: string[];
+  Description: string;
+  Type: string;
+  Episodes: number;
+  AirDate: string;
+  EndDate?: string;
+  Image_URL: string;
+
+  setAnimeIds: (ids: number[]) => void;
 }
 
-interface AnimeStoreState {
-  user: User | null;
-  favoriteList: Anime[];
-  setUser: (user: User | null) => void;
-  addFavorite: (anime: Anime) => void;
-  removeFavorite: (animeId: string) => void;
-  clearFavorites: () => void;
+interface AnimeStore {
+  animes: Anime[];
+  setAnimes: (animes: Anime[]) => void;
 }
 
-export const useAnimeStore = create<AnimeStoreState>((set, get) => ({
-  user: null,
-  favoriteList: [],
-  setUser: (user) => set({ user }),
-  addFavorite: (anime) => {
-    const currentFavorites = get().favoriteList;
-    if (!currentFavorites.find((fav) => fav.id === anime.id)) {
-      set({ favoriteList: [...currentFavorites, anime] });
-    }
-  },
-  removeFavorite: (animeId) => {
-    const updatedFavorites = get().favoriteList.filter(
-      (anime) => anime.id !== animeId
-    );
-    set({ favoriteList: updatedFavorites });
-  },
-  clearFavorites: () => set({ favoriteList: [] }),
+export const useAnimeStore = create<AnimeStore>((set) => ({
+  animes: [],
+  setAnimes: (animes: Anime[]) => set({ animes }),
 }));
