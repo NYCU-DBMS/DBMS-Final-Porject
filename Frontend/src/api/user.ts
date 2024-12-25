@@ -34,20 +34,17 @@ export const searchUser = async (username: string) => {
  * @param password - Password for the new user
  * @returns Registration response or error
  */
-export const register = async (
-  username: string,
-  email: string,
-  password: string
-) => {
+export const registerUser = async (username: string, email: string, password: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/register`, {
-      username,
-      email,
-      password,
+      username: username,
+      email: email,
+      password: password,
     })
-    return response.data // { message, user: { id, username, email } }
+    // console.log(response.data.error)
+    return response.data
   } catch (error: any) {
-    return { error: error.response?.data?.error || "Registration failed" }
+    // throw error?.response?.data?.error || 'Registration failed'
   }
 }
 

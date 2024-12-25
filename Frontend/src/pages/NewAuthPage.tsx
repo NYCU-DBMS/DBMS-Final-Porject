@@ -1,18 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { AuthState } from '@/store'
+import { useAuthStore } from '@/store'
 import toast, { Toaster } from 'react-hot-toast'
 import { NewLoginForm } from '@/components/NewLoginForm'
 import { NewRegisterForm } from '@/components/NewRegisterForm'
 
 export default function NewAuthPage() {
-  const [isLogin, setIsLogin] = useState(true)
-  const { login, register } = useAuth()
+  const [isLoginView, setIsLoginView] = useState(true)
+  const login = useAuthStore((state: AuthState) => state.login)
   const navigate = useNavigate()
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      await login(email, password)
+      // Mock API call - replace this with actual login API
+      const response = {
+        user_id: 1,
+        username: 'testuser',
+        password,
+        email,
+        token: 'mock-token',
+      }
+      login(response)
       navigate('/')
       toast.success('登入成功！', {
         duration: 2000,
@@ -22,10 +31,11 @@ export default function NewAuthPage() {
           color: '#fff',
         },
       })
+      // 跳轉到首頁
+      navigate('/')
     } catch (error: any) {
       console.error('Login error:', error)
-      const errorMessage = getLoginErrorMessage(error)
-      toast.error(errorMessage, {
+      toast.error("error", {
         duration: 2000,
         position: 'top-center',
         style: {
@@ -34,60 +44,23 @@ export default function NewAuthPage() {
         },
       })
     }
-  }
-
-  const handleRegister = async (email: string, password: string, username: string) => {
-    try {
-      await register(email, password, username)
-      navigate('/')
-      toast.success('註冊成功！', {
-        duration: 2000,
-        position: 'top-center',
-        style: {
-          background: '#22c55e', 
-          color: '#fff',
-        },
-      })
-    } catch (error: any) {
-      console.error('Registration error:', error)
-      const errorMessage = getRegistrationErrorMessage(error)
-      toast.error(errorMessage, {
-        duration: 2000,
-        position: 'top-center',
-        style: {
-          background: '#ef4444',
-          color: '#fff',
-        },
-      })
-    }
-  }
-
-  const getLoginErrorMessage = (error: any): string => {
-    const errorMessage = error?.response?.data?.message || error.message
-    return errorMessage
-  }
-
-  const getRegistrationErrorMessage = (error: any): string => {
-    const errorMessage = error?.response?.data?.message || error.message
-    return errorMessage
   }
 
   return (
     <div className="m-10 flex items-center justify-center">
       <Toaster />
       <div className="w-full max-w-md">
-        {isLogin ? (
+        {isLoginView ? (
           <>
             <NewLoginForm
-              onSubmit={handleLogin} 
-              onSwitchToRegister={() => setIsLogin(false)} 
+              onSubmit={handleLogin}
+              onSwitchToRegister={() => setIsLoginView(false)}
             />
           </>
         ) : (
           <>
             <NewRegisterForm
-              onSubmit={handleRegister}
-              onSwitchToLogin={() => setIsLogin(true)} 
+              onSwitchToLogin={() => setIsLoginView(true)}
             />
           </>
         )}

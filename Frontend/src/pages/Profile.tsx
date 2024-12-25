@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Label } from "../components/ui/label"
 import toast from "react-hot-toast"
 import { api } from "../services/api"
-import { useAuth } from "../contexts/AuthContext"
 import { User, Lock, Mail, IdCard } from "lucide-react"
+import { useAuthStore } from "@/store"
 
 const getPasswordChangeErrorMessage = (error: any): string => {
   const errorMessage = error?.response?.data?.message || error.message;
@@ -14,7 +14,8 @@ const getPasswordChangeErrorMessage = (error: any): string => {
 };
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user } = useAuthStore()
+  console.log(user)
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",

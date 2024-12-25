@@ -2,14 +2,15 @@ import { Button } from "@/components/ui/button"
 import { User, LogOut, UserCircle } from 'lucide-react'
 import { Link } from "react-router-dom"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAuthStore } from "@/store"
 
 interface NavbarProps {
-  isLoggedIn: boolean
   onLogout: () => void
   userName?: string
 }
 
-export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) {
+export default function Navbar({ onLogout, userName }: NavbarProps) {
+  const { isLoggedIn } = useAuthStore()
   return (
     <nav className="w-full border-b z-50">
       <div className="flex h-16 items-center px-4 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"> 
