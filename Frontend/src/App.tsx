@@ -58,7 +58,6 @@ const AppContent = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/new_login" element={<NewAuthPage />} />
-          <Route path="/new_register" element={<NewAuthPage />} />
           <Route
             path="/favorites"
             element={
