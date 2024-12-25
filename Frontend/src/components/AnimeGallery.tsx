@@ -2,18 +2,26 @@ import { Link } from "react-router-dom"
 import AnimeImage from "./AnimeImage"
 import { useEffect, useState } from "react"
 
+type AnimeIds = number[] | undefined
+
 interface AnimeGalleryProps {
-  animeIds: number[]
+  animeIds: AnimeIds
 }
 
 export default function AnimeGallery({ animeIds }: AnimeGalleryProps) {
-  if (animeIds.length === 0) {
+  // AnimeGallery.tsx:15 Uncaught TypeError: animeIds.slice is not a function at AnimeGallery
+
+  if (!animeIds) {
     return <div>Loading...</div>
   }
-  const [currAnimeIds, setCurrAnimeIds] = useState(animeIds.slice(0, 50))
+  const [currAnimeIds, setCurrAnimeIds] = useState<AnimeIds>([])
   useEffect(() => {
-    setCurrAnimeIds(animeIds.slice(0, 50))
+    if (Array.isArray(animeIds)) {
+      const shownAnimeIds = animeIds.slice(0, 50)
+      setCurrAnimeIds(shownAnimeIds)
+    }
   }, [animeIds])
+  if (!currAnimeIds) return <div>Loading...</div>
   return (
     <div className="gallery grid grid-cols-3 gap-4">
       {
