@@ -1,6 +1,7 @@
 import express from 'express';
 import { query } from './db.js';
 import { QueryResult } from 'pg';
+import dayjs from 'dayjs';
 
 const router = express.Router();
 
@@ -104,17 +105,23 @@ router.post('/insert', async  (req: any, res: any) => {
                     WHERE anime_id=${anime_id};
                 `
                 const animeNameResult: QueryResult = await query(animeNameQuery, []);
+                if(animeNameResult.rows.length == 0){
+                    return res.status(400).json({msg: "", error: "anime not exist"});  
+                }
                 const anime_name = animeNameResult.rows[0].Name;
+                const now = dayjs();
+                const formattedDate = now.format('YYYY-MM-DD');
                 const insertQuery = `
                 INSERT INTO "Favorites_List" (user_id, list_title, anime_id, anime_title, favorited_date)
-                VALUES (${user_id}, '${list_title}', ${anime_id}, '${anime_name}', '1970-01-01');
+                VALUES (${user_id}, '${list_title}', ${anime_id}, '${anime_name}', '${formattedDate}');
                 `;
+                console.log(insertQuery)
                 await query(insertQuery, []);        
                 console.log("favorite/insert: insert success");
                 return res.status(200).json({msg: "success", error: ""});       
             } catch(error){
-                console.error('favorite/insert: Insert SQL error');
-                return res.status(400).json({msg: "", error: "favorite/insert: Insert SQL error"});
+                console.error('favorite/insert: Insert SQL error: ', error);
+                return res.status(400).json({msg: "", error: "favorite/insert: Insert SQL error or anime repeat"});
             }
 
         }
