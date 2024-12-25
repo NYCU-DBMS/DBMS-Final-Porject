@@ -4,21 +4,6 @@ import { query } from './db.js';
 import { QueryResult } from 'pg';
 
 const router = express.Router();
-/*
-router.get('/processCSV', async  (req: any, res: any) => {
-    try {
-        processCSVHeaders('./data/anime-dataset-2023.csv', './data/anime-dataset-2023_processed.csv')
-        processCSVHeaders('./data/anime-filtered.csv', './data/anime-filtered_processed.csv')
-        processCSVHeaders('./data/user-filtered.csv', './data/user-filtered_processed.csv')
-        processCSVHeaders('./data/users-details-2023.csv', './data/users-details-2023_processed.csv')
-        processCSVHeaders('./data/users-score-2023.csv', './data/users-score-2023_processed.csv')
-
-    } catch (error) {
-        console.error('processCSV fail:', error);
-        res.status(500).json({ message: 'processCSV fail'});
-    }
-
-})*/
 
 router.get('/importCSV', async  (req: any, res: any) => {
     try {

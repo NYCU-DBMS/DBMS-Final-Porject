@@ -9,7 +9,7 @@ router.post('/create', async  (req: any, res: any) => {
         console.log(req.body)
         const {user_id, list_title} = req.body
         if(!user_id || !list_title){
-            return res.status(400).json({msg: "", error: "favorite/create: No user_id or username"});
+            return res.status(400).json({msg: "", error: "favorite/create: No user_id or list_title"});
         }
 
         const checkTableQuery = `
@@ -80,7 +80,7 @@ router.post('/insert', async  (req: any, res: any) => {
     try {
         const {user_id, list_title, anime_id} = req.body
         if(!user_id || !list_title || !anime_id){
-            return res.status(400).json({msg: "", error: "favorite/insert: No user_id or username or anime_id"});
+            return res.status(400).json({msg: "", error: "favorite/insert: No user_id or list_title or anime_id"});
         }
 
         let checkListResult: QueryResult;
@@ -132,7 +132,7 @@ router.post('/deleteList', async  (req: any, res: any) => {
     try {
         const {user_id, list_title} = req.body
         if(!user_id || !list_title){
-            return res.status(400).json({msg: "", error: "favorite/deleteList: No user_id or username or anime_id"});
+            return res.status(400).json({msg: "", error: "favorite/deleteList: No user_id or list_title"});
         }
 
         let checkListResult: QueryResult;
@@ -178,7 +178,7 @@ router.post('/deleteAnime', async  (req: any, res: any) => {
     try {
         const {user_id, list_title, anime_id} = req.body
         if(!user_id || !list_title || !anime_id){
-            return res.status(400).json({msg: "", error: "favorite/deleteAnime: No user_id or username or anime_id"});
+            return res.status(400).json({msg: "", error: "favorite/deleteAnime: No user_id or list_title or anime_id"});
         }
 
         let checkListResult: QueryResult;
@@ -224,7 +224,7 @@ router.post('/getList', async  (req: any, res: any) => {
     try {
         const {user_id, list_title} = req.body
         if(!user_id || !list_title){
-            return res.status(400).json({msg: "", error: "favorite/getList: No user_id or username or anime_id"});
+            return res.status(400).json({msg: "", error: "favorite/getList: No user_id or list_title"});
         }
 
         let checkListResult: QueryResult;
