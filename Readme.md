@@ -29,6 +29,7 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=*** (當初建資料庫的時候設的密碼)
 DB_DATABASE=postgres
+JWT_SECRET=***(隨便取)
 ```
 
 ```bash
