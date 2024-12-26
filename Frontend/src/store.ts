@@ -61,7 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // if failed, show error message, and do nothing
     if (data.error) {
       console.error(data.error)
-      return
+      return data.error
     }
     const result: UserResponse = await searchUser(username)
     console.log(result)
