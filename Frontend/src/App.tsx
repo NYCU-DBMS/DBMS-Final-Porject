@@ -10,13 +10,15 @@ import toast, { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AnimePage from './pages/AnimePage';
 import NewAuthPage from './pages/NewAuthPage';
+import { useAuthStore } from './store';
 
 const AppContent = () => {
-  const { user, logout, isLoading } = useAuth();
+  const { user, isLoggedIn } = useAuthStore();
+  // const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    // logout();
     toast.success('登出成功！', {
       duration: 1500,
       position: 'top-center',
@@ -31,9 +33,9 @@ const AppContent = () => {
     }, 1500);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className='min-h-screen flex flex-col dark:bg-slate-800'>
@@ -48,7 +50,6 @@ const AppContent = () => {
         }}
       />
       <NavBar
-        isLoggedIn={!!user}
         onLogout={handleLogout}
         userName={user?.username || ''}
       />

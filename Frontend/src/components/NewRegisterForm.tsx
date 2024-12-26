@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useAuthStore, AuthState } from '@/store'
 
 interface RegisterFormProps {
-  onSubmit: (email: string, password: string, username: string) => void
   onSwitchToLogin: () => void
   error?: string
 }
 
-export const NewRegisterForm = ({ onSubmit, onSwitchToLogin, error }: RegisterFormProps) => {
+export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) => {
+  const { register } = useAuthStore((state: AuthState) => state)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -27,7 +28,10 @@ export const NewRegisterForm = ({ onSubmit, onSwitchToLogin, error }: RegisterFo
       })
       return
     }
-    onSubmit(email, password, username)
+    console.log(username, email, password)
+    register(username, email, password)
+    // if success, switch to login
+    onSwitchToLogin() 
   }
 
   if (error) {
