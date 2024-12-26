@@ -42,9 +42,9 @@ router.post('/add', async  (req: any, res: any) => {
         await checkCommentTableExist();
         try{
             const getUsernameQuery = `
-                SELECT "Username"
-                FROM user_details
-                WHERE "Mal_ID"=${user_id};
+                SELECT username
+                FROM users
+                WHERE id=${user_id};
             `
             const getUsernameResult: QueryResult = await query(getUsernameQuery, []);
             if (getUsernameResult.rows.length==0){
