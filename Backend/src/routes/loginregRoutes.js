@@ -15,9 +15,27 @@ const pool = new Pool({
 
 const router = express.Router();
 
-router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+const checkUsersTable = async () => {
+  const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS Users (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          username VARCHAR(255) NOT NULL UNIQUE,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password VARCHAR(255) NOT NULL
+      );
+  `;
+  try {
+      await pool.query(createTableQuery);
+      next();
+  } catch (error) {
+      console.error('Error ensuring Users table:', error);
+      next();
+  }
+};
 
+router.post('/login', checkUsersTable, async (req, res) => {
+    const { username, password } = req.body;
+    
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
@@ -48,7 +66,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', checkUsersTable, async (req, res) => {
     const { username, email, password } = req.body;
     console.log("register route");
     try {
@@ -92,31 +110,31 @@ router.post('/register', async (req, res) => {
     }
 });
 
-const authenticate_search = (req, res, next) => {
-  const userID = req.body.userID;
+// const authenticate_search = (req, res, next) => {
+//   const userID = req.body.userID;
 
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1];
 
-  req.userID = userID;
+//   req.userID = userID;
 
-  if (!token) {
-    req.MSG = 'Not logged in';
-    next();
-  }
+//   if (!token) {
+//     req.MSG = 'Not logged in';
+//     next();
+//   }
 
-  try {
-    const result = jwt.verify(token, process.env.JWT_SECRET);
-    req.MSG = 'Logged in';
-  } catch (err) {
-    req.MSG = 'Not logged in'
-  }
+//   try {
+//     const result = jwt.verify(token, process.env.JWT_SECRET);
+//     req.MSG = 'Logged in';
+//   } catch (err) {
+//     req.MSG = 'Not logged in'
+//   }
 
-  next();
-};
+//   next();
+// };
 
-router.post('/search', async (req, res) => {
-    const userID = req.body.userID;
+router.get('/search/:id(\\d+)', checkUsersTable, async (req, res) => {
+    const userID = req.params.id;
     try {
         const query = `
             SELECT
@@ -142,16 +160,16 @@ router.post('/search', async (req, res) => {
     }
 });
 
-router.patch('/update-password', async (req, res) => {
+router.patch('/update-password', checkUsersTable, async (req, res) => {
     const { oldPW, newPW, userID } = req.body;
-  
+
     if (!oldPW || !newPW) {
       return res.status(400).json({ error: 'Both old and new passwords are required' });
     }
   
     try {  
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
-      const { rows } = await pool.query(userQuery, [userId]);
+      const { rows } = await pool.query(userQuery, [userID]);
       const user = rows[0];
       const isMatch = await bcrypt.compare(oldPW, user.password);
   
@@ -161,7 +179,7 @@ router.patch('/update-password', async (req, res) => {
   
       const hashedPW = await bcrypt.hash(newPW, 10);
       const updatePWQuery = 'UPDATE Users SET password = $1 WHERE id = $2';
-      await pool.query(updatePWQuery, [hashedPW, userId]);
+      await pool.query(updatePWQuery, [hashedPW, userID]);
   
       res.json({ message: 'Password updated successfully' });
     } catch (err) {
@@ -170,7 +188,7 @@ router.patch('/update-password', async (req, res) => {
     }
 });
 
-router.patch('/update-email', async (req, res) => {
+router.patch('/update-email', checkUsersTable, async (req, res) => {
     const { PW, newEmail, userID } = req.body;
   
     if (!PW || !newEmail) {
@@ -179,7 +197,7 @@ router.patch('/update-email', async (req, res) => {
   
     try {
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
-      const { rows } = await pool.query(userQuery, [userId]);
+      const { rows } = await pool.query(userQuery, [userID]);
       const user = rows[0];
       const isMatch = await bcrypt.compare(PW, user.password);
   
@@ -188,7 +206,7 @@ router.patch('/update-email', async (req, res) => {
       }
 
       const updateEmailQuery = 'UPDATE Users SET email = $1 WHERE id = $2';
-      await pool.query(updateEmailQuery, [newEmail, userId]);
+      await pool.query(updateEmailQuery, [newEmail, userID]);
   
       res.json({ message: 'Email updated successfully' });
     } catch (err) {
