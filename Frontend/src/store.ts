@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { registerUser, searchUser, login, updatePassword } from '@/api/user'
+import { registerUser, searchUser, login, updatePassword } from '@/api/auth'
 
 interface Anime {
   id: number
@@ -38,7 +38,7 @@ interface User {
 export interface AuthState {
   user: User | null
   isLoggedIn: boolean
-  login: (username: string, password: string) => void
+  login: (username: string, password: string) => Promise<void | "error">
   logout: () => void
   register: (username: string, email: string, password: string) => void
   updatePassword: (oldPW: string, newPW: string) => void
@@ -61,7 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // if failed, show error message, and do nothing
     if (data.error) {
       console.error(data.error)
-      return
+      return "error"
     }
     const result: UserResponse = await searchUser(username)
     console.log(result)

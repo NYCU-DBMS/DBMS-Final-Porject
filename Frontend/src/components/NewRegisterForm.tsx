@@ -31,6 +31,14 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
     console.log(username, email, password)
     register(username, email, password)
     // if success, switch to login
+    toast.success('註冊成功！', {
+      duration: 2000,
+      position: 'top-center',
+      style: {
+        background: '#22c55e',
+        color: '#fff',
+      },
+    })
     onSwitchToLogin() 
   }
 

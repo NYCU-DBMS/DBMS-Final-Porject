@@ -16,7 +16,18 @@ export const NewLoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
   const navigate = useNavigate()
   const handleLogin = async (username: string, password: string) => {
     try {
-      login(username, password)
+      const result = await login(username, password);
+      if (result === "error") {
+        toast.error('登入失敗！', {
+          duration: 2000,
+          position: 'top-center',
+          style: {
+            background: '#ef4444',
+            color: '#fff',
+          },
+        })
+        return
+      }
       navigate('/')
       toast.success('登入成功！', {
         duration: 2000,
