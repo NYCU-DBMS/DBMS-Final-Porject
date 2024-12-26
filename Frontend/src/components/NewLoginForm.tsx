@@ -1,32 +1,62 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { AuthState } from '@/store'
+import { useAuthStore } from '@/store'
 
 interface LoginFormProps {
-  onSubmit: (email: string, password: string) => void
   onSwitchToRegister: () => void 
 }
 
-export const NewLoginForm = ({ onSubmit, onSwitchToRegister }: LoginFormProps) => {
-  const [email, setEmail] = useState('')
+export const NewLoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
+  const login = useAuthStore((state: AuthState) => state.login)
+  const navigate = useNavigate()
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      login(username, password)
+      navigate('/')
+      toast.success('登入成功！', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#22c55e',
+          color: '#fff',
+        },
+      })
+      navigate('/')
+    } catch (error: any) {
+      console.error('Login error:', error)
+      toast.error("error", {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        },
+      })
+    }
+  }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(email, password)
+    handleLogin(username, password)
   }
-
+  
   return (
     <div className='flex justify-center items-center'>
       <form onSubmit={handleSubmit} className="space-y-6 bg-[#1a1a1a] p-8 rounded-xl shadow-lg overflow-auto">
         <h2 className="text-2xl font-bold text-white mb-6">SIGN IN</h2>
         
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-            Email
+          <label htmlFor="username" className="block text-sm font-medium text-gray-300">
+            Username
           </label>
           <input
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
             />

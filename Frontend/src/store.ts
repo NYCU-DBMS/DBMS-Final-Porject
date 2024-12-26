@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { registerUser } from '@/api/user'
+import { registerUser, searchUser, login } from '@/api/user'
 
 interface Anime {
   id: number
@@ -28,7 +28,7 @@ export const useAnimeStore = create<AnimeStore>((set) => ({
 }))
 
 interface User {
-  user_id: number
+  user_id: string
   username: string
   password: string
   email: string
@@ -38,19 +38,44 @@ interface User {
 export interface AuthState {
   user: User | null
   isLoggedIn: boolean
-  login: (user: User) => void
+  login: (username: string, password: string) => void
   logout: () => void
   register: (username: string, email: string, password: string) => void
+}
+
+type UserResponse = {
+  id: string
+  username: string
+  email: string
+  token: string
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoggedIn: false,
-  login: (user) =>
+  login: async (username, password) => {
+    const data = await login(username, password)
+    console.log(data)
+    // if success, set user and isLoggedIn to true
+    // if failed, show error message, and do nothing
+    if (data.error) {
+      console.error(data.error)
+      return
+    }
+    const result: UserResponse = await searchUser(username)
+    console.log(result)
     set({
-      user,
+      user: {
+        user_id: result.id,
+        username: result.username,
+        password: '', // 密碼不應存儲在前端
+        email: result.email,
+        token: result.token,
+      },
       isLoggedIn: true,
-    }),
+    })
+
+  },
   logout: () =>
     set({
       user: null,
