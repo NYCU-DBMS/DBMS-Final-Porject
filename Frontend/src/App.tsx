@@ -46,7 +46,7 @@ const AppContent = () => {
           <Route
             path="/profile"
             element={
-              user ? <Profile /> : <Navigate to="/login" replace />
+              user ? <Profile /> : <Navigate to="/new_login" replace />
             }
           />
           <Route path='/anime/:id' element={<AnimePage />} />

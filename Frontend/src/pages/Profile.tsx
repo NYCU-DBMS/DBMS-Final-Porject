@@ -4,17 +4,16 @@ import { Input } from "../components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Label } from "../components/ui/label"
 import toast from "react-hot-toast"
-import { api } from "../services/api"
 import { User, Lock, Mail, IdCard } from "lucide-react"
 import { useAuthStore } from "@/store"
 
 const getPasswordChangeErrorMessage = (error: any): string => {
-  const errorMessage = error?.response?.data?.message || error.message;
-  return errorMessage;
-};
+  const errorMessage = error?.response?.data?.message || error.message
+  return errorMessage
+}
 
 export default function Profile() {
-  const { user } = useAuthStore()
+  const { user, updatePassword } = useAuthStore()
   console.log(user)
   const [passwords, setPasswords] = useState({
     currentPassword: "",
@@ -34,15 +33,14 @@ export default function Profile() {
           background: '#ef4444',
           color: '#fff',
         },
-      });
+      })
       return
     }
     setIsLoading(true)
     try {
-      await api.changePassword(
-        passwords.currentPassword,
-        passwords.newPassword
-      );
+      const data = updatePassword(passwords.currentPassword, passwords.newPassword)
+      
+      console.log("Profile.tsx: ", data)
 
       toast.success("密碼修改成功！", {
         duration: 2000,
@@ -51,15 +49,15 @@ export default function Profile() {
           background: '#22c55e',
           color: '#fff',
         },
-      });
+      })
       setPasswords({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       })
     } catch (error: any) {
-      console.error('Password change error:', error);
-      const errorMessage = getPasswordChangeErrorMessage(error);
+      console.error('Password change error:', error)
+      const errorMessage = getPasswordChangeErrorMessage(error)
       toast.error(errorMessage, {
         duration: 2000,
         position: 'top-center',
@@ -67,7 +65,7 @@ export default function Profile() {
           background: '#ef4444',
           color: '#fff',
         },
-      });
+      })
     } finally {
       setIsLoading(false)
     }

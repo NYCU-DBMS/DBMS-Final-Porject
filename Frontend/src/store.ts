@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { registerUser, searchUser, login } from '@/api/user'
+import { registerUser, searchUser, login, updatePassword } from '@/api/user'
 
 interface Anime {
   id: number
@@ -41,6 +41,7 @@ export interface AuthState {
   login: (username: string, password: string) => void
   logout: () => void
   register: (username: string, email: string, password: string) => void
+  updatePassword: (oldPW: string, newPW: string) => void
 }
 
 type UserResponse = {
@@ -99,6 +100,28 @@ export const useAuthStore = create<AuthState>((set) => ({
           token: '', // 根據需求設置
         },
       })
+    } catch (error) {
+      throw error
+    }
+  },
+  updatePassword: async (oldPW: string, newPW: string) => {
+    // update password
+    try {
+      const data = await updatePassword(oldPW, newPW)
+      console.log(data)
+      if (data.error) {
+        console.error(data.error)
+        return
+      }
+      set((state) => ({
+        user: {
+          user_id: state.user?.user_id || '',
+          username: state.user?.username || '',
+          email: state.user?.email || '',
+          token: state.user?.token || '',
+          password: newPW,
+        },
+      }))
     } catch (error) {
       throw error
     }

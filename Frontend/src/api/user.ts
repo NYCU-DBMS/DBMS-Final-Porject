@@ -60,8 +60,10 @@ export const updatePassword = async (oldPW: string, newPW: string) => {
       oldPW,
       newPW,
     })
+    console.log("user.ts: ", response.data)
     return response.data // { message: 'Password updated successfully' }
   } catch (error: any) {
+    console.error("user.ts ", error)
     return { error: error.response?.data?.error || "Password update failed" }
   }
 }
