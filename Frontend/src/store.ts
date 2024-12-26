@@ -85,6 +85,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const data = await registerUser(username, email, password)
       console.log(data)
+      if (data.error) {
+        console.error(data.error)
+        return
+      }
       const { user } = data
       set({
         user: {

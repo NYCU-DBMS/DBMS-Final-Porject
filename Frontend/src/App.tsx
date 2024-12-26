@@ -1,40 +1,21 @@
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
-import { AuthPage } from './pages/AuthPage';
-import FavoriteListPage from './pages/FavoriteListPage';
-import Profile from './pages/Profile';  // 添加這行
-import NavBar from './components/NavBar';
-import Links from './components/Links';
-import toast, { Toaster } from 'react-hot-toast'
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import AnimePage from './pages/AnimePage';
-import NewAuthPage from './pages/NewAuthPage';
-import { useAuthStore } from './store';
+import { Routes, Route, Navigate } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
+import { AuthPage } from './pages/AuthPage'
+import FavoriteListPage from './pages/FavoriteListPage'
+import Profile from './pages/Profile'
+import NavBar from './components/NavBar'
+import Links from './components/Links'
+import { Toaster } from 'react-hot-toast'
+import AnimePage from './pages/AnimePage'
+import NewAuthPage from './pages/NewAuthPage'
+import { useAuthStore } from './store'
 
 const AppContent = () => {
-  const { user, isLoggedIn } = useAuthStore();
-  // const { user, logout, isLoading } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // logout();
-    toast.success('登出成功！', {
-      duration: 1500,
-      position: 'top-center',
-      style: {
-        background: '#22c55e',
-        color: '#fff',
-      },
-    });
-    navigate('/', { replace: true });
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
-  };
+  const { user } = useAuthStore()
 
   // if (isLoading) {
-  //   return <div>Loading...</div>;
+  //   return <div>Loading...</div>
   // }
 
   return (
@@ -49,10 +30,7 @@ const AppContent = () => {
           },
         }}
       />
-      <NavBar
-        onLogout={handleLogout}
-        userName={user?.username || ''}
-      />
+      <NavBar />
       <Links />
       <div className='flex-1'>
         <Routes>
@@ -76,13 +54,11 @@ const AppContent = () => {
         </Routes>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
+    <AppContent />
+  )
 }
