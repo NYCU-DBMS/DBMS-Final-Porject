@@ -133,8 +133,8 @@ router.post('/register', checkUsersTable, async (req, res) => {
 //   next();
 // };
 
-router.get('/search/:id(\\d+)', checkUsersTable, async (req, res) => {
-    const userID = req.params.id;
+router.get('/search/:username', checkUsersTable, async (req, res) => {
+    const username = req.params.username;
     try {
         const query = `
             SELECT
@@ -142,9 +142,9 @@ router.get('/search/:id(\\d+)', checkUsersTable, async (req, res) => {
                 "username",
                 "email"
             FROM Users
-            WHERE "id" = $1;
+            WHERE "username" = $1;
         `;
-        const { rows } = await pool.query(query, [userID]);
+        const { rows } = await pool.query(query, [username]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
