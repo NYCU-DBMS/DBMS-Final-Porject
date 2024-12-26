@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import AnimeImage from "./AnimeImage"
 import { useEffect, useState } from "react"
+import { filterAnime } from "@/utils/filterAnime"
 
 type AnimeIds = number[] | undefined
 
@@ -16,10 +17,13 @@ export default function AnimeGallery({ animeIds }: AnimeGalleryProps) {
   }
   const [currAnimeIds, setCurrAnimeIds] = useState<AnimeIds>([])
   useEffect(() => {
-    if (Array.isArray(animeIds)) {
-      const shownAnimeIds = animeIds.slice(0, 50)
-      setCurrAnimeIds(shownAnimeIds)
+    const fetchAndSetAnime = async () => {
+      if (Array.isArray(animeIds)) {
+        const shownAnimeIds = await filterAnime(animeIds)
+        setCurrAnimeIds(shownAnimeIds)
+      }
     }
+    fetchAndSetAnime()
   }, [animeIds])
   if (!currAnimeIds) return <div>Loading...</div>
   return (

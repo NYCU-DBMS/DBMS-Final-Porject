@@ -31,6 +31,7 @@ export default function AnimePage() {
       <div className="animate-pulse">Loading...</div>
     </div>
   )
+  console.log(currentAnime.Image_URL)
 
   return (
     <div className="container mx-auto px-4 py-8">
