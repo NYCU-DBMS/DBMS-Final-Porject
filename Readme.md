@@ -40,51 +40,12 @@ npm run dev
 (可以到http://localhost:8000/dbtest/connection 看有沒有連上資料庫)
 (接著到http://localhost:8000/dbinit/importCSV 把CSV資料灌進資料庫，要等一段時間)
 
-### DataBase
-建立資料庫：
+### DataBase(建立users table測試auth功能)
 ```sql
-CREATE DATABASE IF NOT EXISTS dbms_final;
-USE dbms_final;
-
 CREATE TABLE Users (
-    id VARCHAR(36) PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    password VARCHAR(255) NOT NULL
+);
 ```
-
-新增一個管理員帳號 (暫無特權) ：
-```sql
-use dbms_final;
-INSERT INTO Users (id, username, email, password) 
-VALUES (UUID(), 'admin', 'admin', '$2a$10$rD872rosLum4f6TsXtkC6e0H40.7g6YMlqfkKMlLNg6E0rXB3wPZK');
-select * from Users;
-```
-
-後端的.env設置：
-```bash
-DATABASE_URL="mysql://username:userpassword@localhost:3306/dbms_final"
-JWT_SECRET="8d1f3b8b9c7e4a6d2f5h8j9k4m3n6p7q1r5s8t2v4w7x9y3z6a1c4e7g9i2l5o8"
-```
-
-### Api請求格式
-### 登入:
-http://localhost:8000/api/auth/login
-![image](https://github.com/user-attachments/assets/9f8dcd1c-deea-44d7-86f4-3f08c5e1e35e)
-### 註冊:
-http://localhost:8000/api/auth/register
-![image](https://github.com/user-attachments/assets/1fc430e9-0a50-41b6-aa13-5a6fbbe66508)
-### 更改密碼 (要先設置Headers):
-http://localhost:8000/api/auth/change-password
-```bash
-Authorization: Bearer {登入或註冊時得到的token}
-Content-Type: application/json
-```
-![image](https://github.com/user-attachments/assets/ba29f7a5-428d-45b1-ba13-a7d8264dec27)
-![image](https://github.com/user-attachments/assets/dd703c03-7efc-4f15-9cdc-619be62ae6d7)
-
-
-

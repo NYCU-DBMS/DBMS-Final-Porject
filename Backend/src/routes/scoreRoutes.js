@@ -95,4 +95,4 @@ router.post('/add', async (req, res) => {
     }
 });
 
-export const animeRoutes = router; 
+export const scoreRoutes = router; 

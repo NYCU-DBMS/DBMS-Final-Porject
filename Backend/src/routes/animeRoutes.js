@@ -3,7 +3,6 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const router = express.Router();
-const port = 3000;
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -38,49 +37,53 @@ router.get('/', (req, res) => {
 });
 
 router.get('/all', async (req, res) => {
-    //console.log('Route hit');
     const sortType = req.query.sort;
-    //console.log('Received sortType:', sortType);
-    let sortMethod = ''
+    let query = '';
 
     switch (sortType) {
         case 'score_asc':
-            sortMethod = '"Score" ASC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Score" IS NOT NULL
+                ORDER BY "Score" ASC;
+            `;
             break;
+
         case 'score_desc':
-            sortMethod = '"Score" DESC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Score" IS NOT NULL
+                ORDER BY "Score" DESC;
+            `;
             break;
+
         case 'year_asc':
-            sortMethod =  
-            `
-                WHERE "Aired" IS NOT NULL
-                CASE 
-                    WHEN \"Aired\" = \'Not available\' THEN 10000
-                    ELSE 10001 
-                END DESC\, 
-                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Aired" IS NOT NULL AND "Aired" != 'Not available'
+                ORDER BY
+                    CAST(substring("Aired" FROM '\\d{4}') AS INT) ASC;
+            `;
             break;
+
         case 'year_desc':
-            sortMethod =  
-            `
-                WHERE "Aired" IS NOT NULL
-                CASE 
-                    WHEN \"Aired\" = \'Not available\' THEN 1
-                    ELSE 0 
-                END ASC\, 
-                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Aired" IS NOT NULL AND "Aired" != 'Not available'
+                ORDER BY
+                    CAST(substring("Aired" FROM '\\d{4}') AS INT) DESC;
+            `;
             break;
+
         default:
             return res.status(400).json({ error: 'Invalid sort type' });
     }
 
     try {
-        const query = `
-            SELECT "anime_id"
-            FROM anime_data
-            ORDER BY ${sortMethod};
-        `;
-
         const { rows } = await pool.query(query);
 
         if (rows.length === 0) {

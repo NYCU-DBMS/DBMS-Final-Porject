@@ -19,33 +19,32 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required' });
+      return res.status(400).json({ error: 'Username and password are required' });
     }
 
     try {
-        const query = 'SELECT * FROM users WHERE username = $1';
-        const { rows } = await pool.query(query, [username]);
+      const query = 'SELECT * FROM users WHERE username = $1';
+      const { rows } = await pool.query(query, [username]);
 
-        if (rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid username or password' });
-        }
+      if (rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
 
-        const user = rows[0];
+      const user = rows[0];
 
-        //和加密過後的密碼比較
-        const Match = await bcrypt.compare(password, user.password);
+      //和加密過後的密碼比較
+      const Match = await bcrypt.compare(password, user.password);
 
-        if (!Match) {
-            return res.status(401).json({ error: 'Invalid username or password' });
-        }
+      if (!Match) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
 
         // 有效登入時間 - 30分鐘
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
-        
-        res.json({ message: 'Login successful', token });
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
+      res.json({ message: 'Login successful', token });
     } catch (err) {
-        console.error('Error during login:', err);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error during login:', err);
+      res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -93,10 +92,31 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/search/:username', async (req, res) => {
-    const username = req.params.username;
-    const Token = req.headers.authorization?.split(' ')[1] || "User not logged in";
+const authenticate_search = (req, res, next) => {
+  const userID = req.body.userID;
 
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  req.userID = userID;
+
+  if (!token) {
+    req.MSG = 'Not logged in';
+    next();
+  }
+
+  try {
+    const result = jwt.verify(token, process.env.JWT_SECRET);
+    req.MSG = 'Logged in';
+  } catch (err) {
+    req.MSG = 'Not logged in'
+  }
+
+  next();
+};
+
+router.get('/search/', authenticate_search, async (req, res) => {
+    const { userID, MSG } = req;
     try {
         const query = `
             SELECT
@@ -104,9 +124,9 @@ router.get('/search/:username', async (req, res) => {
                 "username",
                 "email"
             FROM Users
-            WHERE "username" = $1;
+            WHERE "id" = $1;
         `;
-        const { rows } = await pool.query(query, [username]);
+        const { rows } = await pool.query(query, [userID]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -115,17 +135,17 @@ router.get('/search/:username', async (req, res) => {
             id: rows[0].id,
             username: rows[0].username,
             email: rows[0].email,
-            token: Token
+            status: MSG,
         });
-    }
-    catch (err) {
-        console.error('Error fetching anime:', err);
+    } catch (err) {
+        console.error('Error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 router.patch('/update-password', async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1]; //拿token
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
     const { oldPW, newPW } = req.body;
   
     if (!token) {
@@ -137,7 +157,7 @@ router.patch('/update-password', async (req, res) => {
     }
   
     try {
-      const userInfo= jwt.verify(token, process.env.JWT_SECRET);
+      const userInfo = jwt.verify(token, process.env.JWT_SECRET);
       const userId = userInfo.userId;
   
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
@@ -164,7 +184,8 @@ router.patch('/update-password', async (req, res) => {
 });
 
 router.patch('/update-email', async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1]; //拿token
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
     const { PW, newEmail } = req.body;
   
     if (!token) {

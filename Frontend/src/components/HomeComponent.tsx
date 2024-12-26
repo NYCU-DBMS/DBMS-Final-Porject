@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import AnimeGallery from "./AnimeGallery"
-import { fetchAnimeBySort } from "@/fetchAPI/fetchAnime"
-import { fetchAnimeBySearchAndSort } from "@/fetchAPI/fetchAnime"
+import { fetchAnimeBySort } from "@/api/anime"
+import { fetchAnimeBySearchAndSort } from "@/api/anime"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 

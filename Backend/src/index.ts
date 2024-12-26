@@ -5,10 +5,11 @@ import db_init from './db_init';  // 移除 .js
 import search from './search';
 import favorite from './favorite';
 import comment from './comment';
-import { authRoutes } from './routes/authRoutes';  // 移除 .js 並使用具名導入
+//import { authRoutes } from './routes/authRoutes';  // 移除 .js 並使用具名導入
 import { animeRoutes } from './routes/animeRoutes';  //anime api
 import { categoryRoutes } from './routes/categoryRoutes'; //category api
 import { loginregRoutes } from './routes/loginregRoutes'; //login register modify account api
+import { scoreRoutes } from './routes/scoreRoutes';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -45,6 +46,7 @@ app.use('/dbtest', db_test);
 app.use('/dbinit', db_init);
 app.use('/api/anime', animeRoutes);
 app.use('/api/category', categoryRoutes);
+app.use('/api/score', scoreRoutes)
 app.use('/api/search', search);
 app.use('/api/favorite', favorite);
 app.use('/api/comment', comment);

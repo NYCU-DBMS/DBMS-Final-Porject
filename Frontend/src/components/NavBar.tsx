@@ -1,15 +1,29 @@
 import { Button } from "@/components/ui/button"
 import { User, LogOut, UserCircle } from 'lucide-react'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAuthStore } from "@/store"
+import { toast } from "react-hot-toast"
 
-interface NavbarProps {
-  isLoggedIn: boolean
-  onLogout: () => void
-  userName?: string
-}
 
-export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) {
+export default function Navbar() {
+  const navigate = useNavigate()
+  const { user, isLoggedIn, logout } = useAuthStore()
+  const onLogout = () => {
+    logout()
+    toast.success('登出成功！', {
+      duration: 1500,
+      position: 'top-center',
+      style: {
+        background: '#22c55e',
+        color: '#fff',
+      },
+    })
+    navigate('/', { replace: true })
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
+  }
   return (
     <nav className="w-full border-b z-50">
       <div className="flex h-16 items-center px-4 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"> 
@@ -30,7 +44,7 @@ export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) 
               <DropdownMenuContent align="end" className="w-56">
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{userName}</p>
+                    <p className="font-medium">{user?.username}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
@@ -50,7 +64,7 @@ export default function Navbar({ isLoggedIn, onLogout, userName }: NavbarProps) 
             </DropdownMenu>
           ) : (
             <Button variant="ghost" asChild>
-              <Link to="/login">Sign In</Link>
+              <Link to="/new_login">Sign In</Link>
             </Button>
           )}
         </div>
