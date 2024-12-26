@@ -3,7 +3,6 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const router = express.Router();
-const port = 3000;
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -41,22 +40,22 @@ router.get('/all', async (req, res) => {
     //console.log('Route hit');
     const sortType = req.query.sort;
     //console.log('Received sortType:', sortType);
-    let sortMethod;
-    let query;
+    //let sortMethod = ''
+    let query = ''
     switch (sortType) {
         case 'score_asc':
             //sortMethod = '"Score" ASC';
             query = `
                 SELECT "anime_id"
-                FROM anime_data
+                FROM anime_data_filtered
                 ORDER BY "Score" ASC;
             `;
             break;
         case 'score_desc':
             //sortMethod = '"Score" DESC';
-            const query = `
+            query = `
                 SELECT "anime_id"
-                FROM anime_data
+                FROM anime_data_filtered
                 ORDER BY "Score" DESC;
             `;
             break;
@@ -71,14 +70,14 @@ router.get('/all', async (req, res) => {
             //     CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
             query = `
                 SELECT "anime_id"
-                FROM anime_data
+                FROM anime_data_filtered
                 WHERE "Aired" IS NOT NULL
                 ORDER BY "Score" ASC
-                CASE 
-                    WHEN \"Aired\" = \'Not available\' THEN 10000
-                    ELSE 10001 
-                END DESC\, 
-                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
+                    CASE 
+                        WHEN \"Aired\" = \'Not available\' THEN 10000
+                        ELSE 10001 
+                    END DESC\, 
+                    CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
             break;
         case 'year_desc':
             // sortMethod =  
@@ -91,14 +90,14 @@ router.get('/all', async (req, res) => {
             //     CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
             query = `
                 SELECT "anime_id"
-                FROM anime_data
+                FROM anime_data_filtered
                 WHERE "Aired" IS NOT NULL
                 ORDER BY "Score" ASC
-                CASE 
-                    WHEN \"Aired\" = \'Not available\' THEN 1
-                    ELSE 0
-                END ASC\, 
-                CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
+                    CASE 
+                        WHEN \"Aired\" = \'Not available\' THEN 1
+                        ELSE 0
+                    END ASC\, 
+                    CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
             break;
         default:
             return res.status(400).json({ error: 'Invalid sort type' });
@@ -133,7 +132,7 @@ router.get('/:id(\\d+)', async (req, res) => {
                 "Episodes",
                 "Aired",
                 "Image_URL"
-            FROM anime_data
+            FROM anime_data_filtered
             WHERE "anime_id" = $1;
         `;
         const { rows } = await pool.query(query, [animeId]);
