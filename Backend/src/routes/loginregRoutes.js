@@ -115,8 +115,8 @@ const authenticate_search = (req, res, next) => {
   next();
 };
 
-router.get('/search/', authenticate_search, async (req, res) => {
-    const { userID, MSG } = req;
+router.get('/search/', async (req, res) => {
+    const userID = req.body.userID;
     try {
         const query = `
             SELECT
@@ -135,7 +135,6 @@ router.get('/search/', authenticate_search, async (req, res) => {
             id: rows[0].id,
             username: rows[0].username,
             email: rows[0].email,
-            status: MSG,
         });
     } catch (err) {
         console.error('Error:', err);
@@ -144,22 +143,13 @@ router.get('/search/', authenticate_search, async (req, res) => {
 });
 
 router.patch('/update-password', async (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const { oldPW, newPW } = req.body;
-  
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    const { oldPW, newPW, userID } = req.body;
   
     if (!oldPW || !newPW) {
       return res.status(400).json({ error: 'Both old and new passwords are required' });
     }
   
-    try {
-      const userInfo = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = userInfo.userId;
-  
+    try {  
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
       const { rows } = await pool.query(userQuery, [userId]);
       const user = rows[0];
@@ -176,30 +166,18 @@ router.patch('/update-password', async (req, res) => {
       res.json({ message: 'Password updated successfully' });
     } catch (err) {
       console.error('Error updating password:', err);
-      if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
       res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 router.patch('/update-email', async (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const { PW, newEmail } = req.body;
-  
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    const { PW, newEmail, userID } = req.body;
   
     if (!PW || !newEmail) {
       return res.status(400).json({ error: 'Both password and new email address are required' });
     }
   
     try {
-      const userInfo= jwt.verify(token, process.env.JWT_SECRET);
-      const userId = userInfo.userId;
-  
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
       const { rows } = await pool.query(userQuery, [userId]);
       const user = rows[0];
@@ -215,9 +193,6 @@ router.patch('/update-email', async (req, res) => {
       res.json({ message: 'Email updated successfully' });
     } catch (err) {
       console.error('Error updating email:', err);
-      if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
       res.status(500).json({ error: 'Internal Server Error' });
     }
 });
