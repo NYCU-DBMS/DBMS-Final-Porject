@@ -15,9 +15,27 @@ const pool = new Pool({
 
 const router = express.Router();
 
-router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+const checkUsersTable = async (req, res, next) => {
+  const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS Users (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          username VARCHAR(255) NOT NULL UNIQUE,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password VARCHAR(255) NOT NULL
+      );
+  `;
+  try {
+      await pool.query(createTableQuery);
+      next();
+  } catch (error) {
+      console.error('Error ensuring Users table:', error);
+      next();
+  }
+};
 
+router.post('/login', checkUsersTable, async (req, res) => {
+    const { username, password } = req.body;
+    
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
@@ -48,7 +66,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', checkUsersTable, async (req, res) => {
     const { username, email, password } = req.body;
     console.log("register route");
     try {
@@ -92,31 +110,31 @@ router.post('/register', async (req, res) => {
     }
 });
 
-const authenticate_search = (req, res, next) => {
-  const userID = req.body.userID;
+// const authenticate_search = (req, res, next) => {
+//   const userID = req.body.userID;
 
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1];
 
-  req.userID = userID;
+//   req.userID = userID;
 
-  if (!token) {
-    req.MSG = 'Not logged in';
-    next();
-  }
+//   if (!token) {
+//     req.MSG = 'Not logged in';
+//     next();
+//   }
 
-  try {
-    const result = jwt.verify(token, process.env.JWT_SECRET);
-    req.MSG = 'Logged in';
-  } catch (err) {
-    req.MSG = 'Not logged in'
-  }
+//   try {
+//     const result = jwt.verify(token, process.env.JWT_SECRET);
+//     req.MSG = 'Logged in';
+//   } catch (err) {
+//     req.MSG = 'Not logged in'
+//   }
 
-  next();
-};
+//   next();
+// };
 
-router.get('/search/', authenticate_search, async (req, res) => {
-    const { userID, MSG } = req;
+router.get('/search/:username', checkUsersTable, async (req, res) => {
+    const username = req.params.username;
     try {
         const query = `
             SELECT
@@ -124,9 +142,9 @@ router.get('/search/', authenticate_search, async (req, res) => {
                 "username",
                 "email"
             FROM Users
-            WHERE "id" = $1;
+            WHERE "username" = $1;
         `;
-        const { rows } = await pool.query(query, [userID]);
+        const { rows } = await pool.query(query, [username]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -135,7 +153,6 @@ router.get('/search/', authenticate_search, async (req, res) => {
             id: rows[0].id,
             username: rows[0].username,
             email: rows[0].email,
-            status: MSG,
         });
     } catch (err) {
         console.error('Error:', err);
@@ -143,25 +160,16 @@ router.get('/search/', authenticate_search, async (req, res) => {
     }
 });
 
-router.patch('/update-password', async (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const { oldPW, newPW } = req.body;
-  
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-  
+router.patch('/update-password', checkUsersTable, async (req, res) => {
+    const { oldPW, newPW, userID } = req.body;
+
     if (!oldPW || !newPW) {
       return res.status(400).json({ error: 'Both old and new passwords are required' });
     }
   
-    try {
-      const userInfo = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = userInfo.userId;
-  
+    try {  
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
-      const { rows } = await pool.query(userQuery, [userId]);
+      const { rows } = await pool.query(userQuery, [userID]);
       const user = rows[0];
       const isMatch = await bcrypt.compare(oldPW, user.password);
   
@@ -171,37 +179,25 @@ router.patch('/update-password', async (req, res) => {
   
       const hashedPW = await bcrypt.hash(newPW, 10);
       const updatePWQuery = 'UPDATE Users SET password = $1 WHERE id = $2';
-      await pool.query(updatePWQuery, [hashedPW, userId]);
+      await pool.query(updatePWQuery, [hashedPW, userID]);
   
       res.json({ message: 'Password updated successfully' });
     } catch (err) {
       console.error('Error updating password:', err);
-      if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
       res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-router.patch('/update-email', async (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const { PW, newEmail } = req.body;
-  
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+router.patch('/update-email', checkUsersTable, async (req, res) => {
+    const { PW, newEmail, userID } = req.body;
   
     if (!PW || !newEmail) {
       return res.status(400).json({ error: 'Both password and new email address are required' });
     }
   
     try {
-      const userInfo= jwt.verify(token, process.env.JWT_SECRET);
-      const userId = userInfo.userId;
-  
       const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
-      const { rows } = await pool.query(userQuery, [userId]);
+      const { rows } = await pool.query(userQuery, [userID]);
       const user = rows[0];
       const isMatch = await bcrypt.compare(PW, user.password);
   
@@ -210,14 +206,11 @@ router.patch('/update-email', async (req, res) => {
       }
 
       const updateEmailQuery = 'UPDATE Users SET email = $1 WHERE id = $2';
-      await pool.query(updateEmailQuery, [newEmail, userId]);
+      await pool.query(updateEmailQuery, [newEmail, userID]);
   
       res.json({ message: 'Email updated successfully' });
     } catch (err) {
       console.error('Error updating email:', err);
-      if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
       res.status(500).json({ error: 'Internal Server Error' });
     }
 });
