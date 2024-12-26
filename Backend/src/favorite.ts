@@ -5,6 +5,34 @@ import dayjs from 'dayjs';
 
 const router = express.Router();
 
+const checkFavoriteTableExist = async () => {
+    const checkTableQuery = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.tables 
+            WHERE table_name = 'Favorites_List'
+        );
+    `;
+    const checkResult : QueryResult = await query(checkTableQuery, []);
+    // console.log(checkResult);
+    if (!checkResult.rows[0].exists){
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS "Favorites_List" (
+                user_id INTEGER,
+                list_title VARCHAR(255),
+                anime_id INTEGER,
+                anime_title VARCHAR(255),
+                favorited_date DATE,
+                PRIMARY KEY (user_id, list_title, anime_id)
+            );
+        `;
+        await query(createTableQuery, []);
+        console.log(`Favorite/checkTable: Table Favorites_List created`);
+    } else {
+        return 0;
+    }
+}
+
 router.post('/create', async  (req: any, res: any) => {
     try {
         console.log(req.body)
@@ -76,6 +104,38 @@ router.post('/create', async  (req: any, res: any) => {
       }
 });
 
+router.post('/getUsersList', async  (req: any, res: any) => {
+    try {
+        console.log(req.body)
+        const {user_id} = req.body
+        if(!user_id){
+            return res.status(400).json({msg: "", error: "favorite/getUsersList: No user_id"});
+        }
+
+        await checkFavoriteTableExist();
+
+        try{
+            const getUserListQuery = `
+                    SELECT DISTINCT list_title
+                    FROM "Favorites_List"
+                    WHERE user_id=${user_id};
+                `;
+            const getResult: QueryResult = await query(getUserListQuery, []);  
+            const list_titles = getResult.rows.map(row => row.list_title);
+
+            console.log("favorite/getUsersList: Get User's List Success!");
+            return res.status(200).json({list_titles: list_titles});              
+        }catch(error){
+            console.error("favorite/getUsersList: CGet user's list, error: ", error);
+            return res.status(400).json({msg: "", error: "favorite/getUsersList: Get user's list fail"});
+        }
+
+
+      } catch (error) {
+        console.error('favorite/getUsersList: error:', error);
+        res.status(500).json({ msg: "", message: `favorite/getUsersList: error: ${error}` });
+      }
+});
 
 router.post('/insert', async  (req: any, res: any) => {
     try {
