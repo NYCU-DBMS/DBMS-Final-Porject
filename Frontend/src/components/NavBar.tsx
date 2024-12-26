@@ -22,7 +22,7 @@ export default function Navbar() {
     navigate('/', { replace: true })
     setTimeout(() => {
       window.location.reload()
-    }, 1500)
+    }, 500)
   }
   return (
     <nav className="w-full border-b z-50">
