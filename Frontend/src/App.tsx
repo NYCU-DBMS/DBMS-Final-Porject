@@ -62,7 +62,7 @@ const AppContent = () => {
           <Route
             path="/favorites"
             element={
-              user ? <FavoriteListPage /> : <Navigate to="/login" replace />
+              user ? <FavoriteListPage /> : <Navigate to="/new_login" replace />
             }
           />
           <Route

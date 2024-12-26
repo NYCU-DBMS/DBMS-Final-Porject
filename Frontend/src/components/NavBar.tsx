@@ -51,7 +51,7 @@ export default function Navbar({ onLogout, userName }: NavbarProps) {
             </DropdownMenu>
           ) : (
             <Button variant="ghost" asChild>
-              <Link to="/login">Sign In</Link>
+              <Link to="/new_login">Sign In</Link>
             </Button>
           )}
         </div>
