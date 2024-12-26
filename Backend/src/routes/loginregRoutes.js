@@ -15,7 +15,7 @@ const pool = new Pool({
 
 const router = express.Router();
 
-const checkUsersTable = async () => {
+const checkUsersTable = async (req, res, next) => {
   const createTableQuery = `
       CREATE TABLE IF NOT EXISTS Users (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
