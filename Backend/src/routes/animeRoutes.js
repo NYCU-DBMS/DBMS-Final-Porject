@@ -41,19 +41,39 @@ router.get('/all', async (req, res) => {
     //console.log('Route hit');
     const sortType = req.query.sort;
     //console.log('Received sortType:', sortType);
-    let sortMethod = ''
-
+    let sortMethod;
+    let query;
     switch (sortType) {
         case 'score_asc':
-            sortMethod = '"Score" ASC';
+            //sortMethod = '"Score" ASC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                ORDER BY "Score" ASC;
+            `;
             break;
         case 'score_desc':
-            sortMethod = '"Score" DESC';
+            //sortMethod = '"Score" DESC';
+            const query = `
+                SELECT "anime_id"
+                FROM anime_data
+                ORDER BY "Score" DESC;
+            `;
             break;
         case 'year_asc':
-            sortMethod =  
-            `
+            // sortMethod =  
+            // `
+            //     WHERE "Aired" IS NOT NULL
+            //     CASE 
+            //         WHEN \"Aired\" = \'Not available\' THEN 10000
+            //         ELSE 10001 
+            //     END DESC\, 
+            //     CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
                 WHERE "Aired" IS NOT NULL
+                ORDER BY "Score" ASC
                 CASE 
                     WHEN \"Aired\" = \'Not available\' THEN 10000
                     ELSE 10001 
@@ -61,12 +81,22 @@ router.get('/all', async (req, res) => {
                 CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) ASC`;
             break;
         case 'year_desc':
-            sortMethod =  
-            `
+            // sortMethod =  
+            // `
+            //     WHERE "Aired" IS NOT NULL
+            //     CASE 
+            //         WHEN \"Aired\" = \'Not available\' THEN 1
+            //         ELSE 0 
+            //     END ASC\, 
+            //     CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
                 WHERE "Aired" IS NOT NULL
+                ORDER BY "Score" ASC
                 CASE 
                     WHEN \"Aired\" = \'Not available\' THEN 1
-                    ELSE 0 
+                    ELSE 0
                 END ASC\, 
                 CAST\(substring\(\"Aired\" FROM \'\(\\d\{4\}\)\'\) AS INT\) DESC`;
             break;
@@ -75,12 +105,6 @@ router.get('/all', async (req, res) => {
     }
 
     try {
-        const query = `
-            SELECT "anime_id"
-            FROM anime_data
-            ORDER BY ${sortMethod};
-        `;
-
         const { rows } = await pool.query(query);
 
         if (rows.length === 0) {
