@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { registerUser, searchUser, login, updatePassword } from '@/api/user'
+import { registerUser, searchUser, login, updatePassword } from '@/api/auth'
 
 interface Anime {
   id: number
