@@ -104,7 +104,7 @@ export default function Profile() {
                   <IdCard className="w-4 h-4 text-white" />
                   <div>
                     <Label className="text-white">用戶 ID</Label>
-                    <div className="text-white">{user?.id}</div>
+                    <div className="text-white">{user?.user_id}</div>
                   </div>
                 </div>
               </div>
