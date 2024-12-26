@@ -115,7 +115,7 @@ const authenticate_search = (req, res, next) => {
   next();
 };
 
-router.post('/search/', async (req, res) => {
+router.post('/search', async (req, res) => {
     const userID = req.body.userID;
     try {
         const query = `
