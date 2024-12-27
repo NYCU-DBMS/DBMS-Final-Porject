@@ -28,7 +28,7 @@ router.post("/remove", async (req, res) => {
 
     try {
         const { rows } = await pool.query(`
-            SELECT "rating" FROM user_rating WHERE "userid" = $1 AND "anime_id" = $2
+            SELECT "rating" FROM user_rating WHERE "username" = $1 AND "anime_id" = $2
         `, [user_id, anime_id]);
 
         if (rows.length === 0) {
@@ -38,7 +38,7 @@ router.post("/remove", async (req, res) => {
         const score = rows[0].rating;
 
         await pool.query(`
-            DELETE FROM user_rating WHERE "userid" = $1 AND "anime_id" = $2
+            DELETE FROM user_rating WHERE "username" = $1 AND "anime_id" = $2
         `, [user_id, anime_id]);
 
         await pool.query(`
