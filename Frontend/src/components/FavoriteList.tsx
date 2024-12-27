@@ -4,10 +4,12 @@ import {
   getFavoriteList, 
   deleteAnimeFromList,
   createFavoriteList,
-  getUsersList
+  getUsersList,
+  deleteList
 } from "@/api/favorite";
 import { fetchAnimeById } from "@/api/anime";
 import { useAuthStore } from "@/store";
+import { FaTrash, FaHeart, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface AnimeDetails {
@@ -20,14 +22,9 @@ export default function FavoriteList() {
   const { user, isLoggedIn } = useAuthStore();
   const [animes, setAnimes] = useState<AnimeDetails[]>([]);
   const [userLists, setUserLists] = useState<string[]>([]);
-  const [selectedList, setSelectedList] = useState<string>("我的收藏");
+  const [selectedList, setSelectedList] = useState<string>("快速收藏");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-
-  // 調試用
-  useEffect(() => {
-    console.log("Auth State:", { user, isLoggedIn });
-  }, [user, isLoggedIn]);
 
   // 獲取用戶的所有收藏清單
   useEffect(() => {
@@ -51,9 +48,9 @@ export default function FavoriteList() {
         if (!result.list_titles || result.list_titles.length === 0) {
           console.log("No lists found, creating default list");
           try {
-            await createFavoriteList(user.user_id, "快速收藏"); 
+            await createFavoriteList(user.user_id, "快速收藏");
             // 重新獲取清單
-            const updatedResult = await getUsersList(user.user_id); 
+            const updatedResult = await getUsersList(user.user_id);
             if (updatedResult.error) {
               throw new Error(updatedResult.error);
             }
@@ -93,7 +90,7 @@ export default function FavoriteList() {
         if (result.error?.includes("List not exist")) {
           console.log("Creating new list:", selectedList);
           await createFavoriteList(user.user_id, selectedList);
-          result = await getFavoriteList((user.user_id), selectedList);
+          result = await getFavoriteList(user.user_id, selectedList);
         }
 
         if (result.anime_id && result.anime_id.length > 0) {
@@ -147,6 +144,46 @@ export default function FavoriteList() {
     }
   };
 
+  const handleDeleteList = async (listTitle: string) => {
+    if (!isLoggedIn || !user?.user_id) {
+      toast.error("請先登入");
+      return;
+    }
+
+    // 防止刪除"我的收藏"清單
+    if (listTitle === "快速收藏") {
+      toast.error("無法刪除「快速收藏」清單");
+      return;
+    }
+
+    // 防止刪除最後一個清單
+    if (userLists.length === 1) {
+      toast.error("無法刪除最後一個清單");
+      return;
+    }
+
+    // 確認對話框
+    if (!window.confirm(`確定要刪除「${listTitle}」清單嗎？此操作無法撤銷。`)) {
+      return;
+    }
+
+    try {
+      const result = await deleteList(user.user_id, listTitle);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
+      setUserLists(prev => prev.filter(list => list !== listTitle));
+      if (selectedList === listTitle) {
+        setSelectedList(userLists.find(list => list !== listTitle) || "快速收藏");
+      }
+      toast.success(`已刪除「${listTitle}」清單`);
+    } catch (err) {
+      console.error("Error deleting list:", err);
+      toast.error("刪除清單失敗");
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="flex justify-center items-center p-10 text-gray-600 dark:text-gray-400">
@@ -155,84 +192,124 @@ export default function FavoriteList() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex gap-5 m-10 p-10 dark:bg-slate-700 justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-5">
-      {/* 清單選擇器 */}
-      <div className="flex justify-center gap-4 px-4 flex-wrap">
-        {userLists.length === 0 ? (
-          <div className="text-gray-500 dark:text-gray-400">
-            正在創建默認收藏清單...
-          </div>
-        ) : (
-          userLists.map(list => (
-            <button
-              key={list}
-              onClick={() => setSelectedList(list)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                selectedList === list
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-              }`}
-            >
-              {list}
-            </button>
-          ))
-        )}
+  // 移除最外層的 min-h-screen，因為我們要讓背景色延伸到整個視窗
+  <div className="bg-gray-50 dark:bg-gray-900 h-full w-full">
+    {!isLoggedIn ? (
+      // 未登入狀態也要填滿
+      <div className="h-[calc(100vh-64px)] flex justify-center items-center p-10 text-gray-600 dark:text-gray-400">
+        請先登入以查看收藏清單
       </div>
-
-      {/* 錯誤提示 */}
-      {error && (
-        <div className="text-center text-red-500 dark:text-red-400">
-          {error}
+    ) : (
+      <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-64px)]">
+        {/* 標題部分 */}
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            我的收藏清單
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            管理您收藏的動畫作品
+          </p>
         </div>
-      )}
 
-      {/* 動畫列表 */}
-      <div className="flex flex-wrap gap-5 m-10 p-10 dark:bg-slate-700 justify-center">
-        {animes.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            該清單中還沒有動畫
-          </div>
-        ) : (
-          animes.map((anime) => (
-            <div 
-              key={anime.id}
-              className="group relative overflow-hidden aspect-[3/2] w-[20%] min-w-[200px]"
-            >
-              <Link to={`/anime/${anime.id}`}>
-                <div className="relative h-full">
-                  <img 
-                    src={anime.imageUrl} 
-                    alt={anime.name} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <div className="text-white font-semibold truncate">
-                      {anime.name}
-                    </div>
-                  </div>
+        {/* 清單選擇器 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+          <div className="flex flex-wrap gap-3 items-center justify-center">
+            {userLists.length === 0 ? (
+              <div className="text-gray-500 dark:text-gray-400 py-2">
+                正在創建默認收藏清單...
+              </div>
+            ) : (
+              userLists.map(list => (
+                <div
+                  key={list}
+                  className="relative group"
+                >
+                  <button
+                    onClick={() => setSelectedList(list)}
+                    className={`px-6 py-2 rounded-full transition-all duration-200 flex items-center gap-2
+                      ${selectedList === list
+                        ? "bg-red-500 text-white shadow-md scale-105"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                  >
+                    <FaHeart className={`${selectedList === list ? "text-white" : "text-red-500"}`} />
+                    <span className="truncate max-w-[150px]">{list}</span>
+                    {list !== "快速收藏" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteList(list);
+                        }}
+                        className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        title="刪除清單"
+                      >
+                        <FaTimes className="w-3 h-3 hover:text-red-300" />
+                      </button>
+                    )}
+                  </button>
                 </div>
-              </Link>
-              <button
-                onClick={() => handleRemoveFromList(anime.id)}
-                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          ))
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* 錯誤提示 */}
+        {error && (
+          <div className="text-center text-red-500 dark:text-red-400 mb-6 p-4 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            {error}
+          </div>
         )}
+
+        {/* 動畫列表 - 修改這裡讓它永遠填滿剩餘空間 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 min-h-[calc(100vh-280px)]">
+          {loading ? (
+            <div className="w-full h-full flex justify-center items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+            </div>
+          ) : animes.length === 0 ? (
+            <div className="w-full h-full flex flex-col justify-center items-center">
+              <FaHeart className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">
+                該清單中還沒有動畫
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {animes.map((anime) => (
+                <div 
+                  key={anime.id}
+                  className="group relative overflow-hidden rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300"
+                >
+                  <Link to={`/anime/${anime.id}`}>
+                    <div className="relative aspect-[3/4]">
+                      <img 
+                        src={anime.imageUrl} 
+                        alt={anime.name} 
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <div className="text-white font-semibold text-sm line-clamp-2">
+                          {anime.name}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => handleRemoveFromList(anime.id)}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                    title="從清單中移除"
+                  >
+                    <FaTrash className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    )}
+  </div>
+);
 }

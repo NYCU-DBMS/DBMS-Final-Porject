@@ -98,3 +98,19 @@ export const getUsersList = async (user_id: string): Promise<{ list_titles: stri
     }
   }
 }
+
+export const deleteList = async (userId: string, listTitle: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/deleteList`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: userId, list_title: listTitle }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting list:', error);
+    return { error: 'Failed to delete list' };
+  }
+};

@@ -32,7 +32,7 @@ const CategoryButtons = () => {
     'h-10 min-w-[120px] flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 transition-all text-sm font-medium truncate px-4'
 
   return (
-    <div className="p-6 bg-gray-900 text-white">
+    <div className="text-white">
       <div className="space-y-4">
         {/* First row - 5 buttons */}
         <div className="grid grid-cols-5 gap-4">

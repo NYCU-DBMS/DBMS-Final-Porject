@@ -1,4 +1,5 @@
 import axios from "axios"
+import { useAuthStore } from "@/store"
 
 const API_BASE_URL = "http://localhost:8000/api/auth"
 
@@ -54,19 +55,33 @@ export const registerUser = async (username: string, email: string, password: st
  * @param newPW - New password
  * @returns Password update response or error
  */
-export const updatePassword = async (oldPW: string, newPW: string) => {
+export const updatePassword = async (password: string, new_password: string) => {
   try {
-    const response = await axios.patch(`${API_BASE_URL}/update-password`, {
-      oldPW,
-      newPW,
-    })
-    console.log("user.ts: ", response.data)
-    return response.data // { message: 'Password updated successfully' }
+    const user = useAuthStore.getState().user;
+    if (!user) {
+      throw new Error('請先登入');
+    }
+
+    const response = await axios.post(`${API_BASE_URL}/change-password`, {
+      password,        // 當前密碼
+      new_password    // 新密碼
+    }, {
+      headers: {
+        'Authorization': `Bearer ${user.token}`, // 添加授權 token
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    }
+
+    return response.data;
   } catch (error: any) {
-    console.error("user.ts ", error)
-    return { error: error.response?.data?.error || "Password update failed" }
+    const errorMessage = error.response?.data?.message || error.message || "密碼更新失敗";
+    throw new Error(errorMessage);
   }
-}
+};
 
 /**
  * Update user email
