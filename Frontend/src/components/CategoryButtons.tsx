@@ -12,9 +12,6 @@ interface CategoryButtonsProps {
 const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType, isDisabled }: CategoryButtonsProps) => {
   const [categories, setCategories] = useState<string[]>([])
   const MAX_BUTTONS = 9
-  // when the sortType changes, the animeIds will be updated based on the selected category and sortType
-  // the code below does not handle the case where the sortType changes
-  // updated code:
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -56,6 +53,9 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType, isDisab
 
   const visibleCategories = categories.slice(0, MAX_BUTTONS)
   const remainingCategories = categories.slice(MAX_BUTTONS)
+  
+  // 檢查所選類別是否在剩餘類別中
+  const isSelectedInRemainingCategories = remainingCategories.includes(selectedCategory)
 
   return (
     <div className="text-white">
@@ -89,12 +89,17 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType, isDisab
 
           <div className="relative">
             <select
-              className={`${getButtonClass(selectedCategory)} w-full appearance-none pr-10 text-center`}
+              className={`${getButtonClass(
+                isSelectedInRemainingCategories ? selectedCategory : ""
+              )} w-full appearance-none pr-10 text-center`}
               onChange={(e) => {
                 const selectedValue = e.target.value;
-                handleCategorySelect(selectedValue === "" ? "" : selectedValue);
+                if (selectedValue !== "") {
+                  handleCategorySelect(selectedValue);
+                }
               }}
-              value={remainingCategories.includes(selectedCategory) ? selectedCategory : ""}
+              value={isSelectedInRemainingCategories ? selectedCategory : ""}
+              disabled={isDisabled}
             >
               <option value="">More</option>
               {remainingCategories.map((category) => (
