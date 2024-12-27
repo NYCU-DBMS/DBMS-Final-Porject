@@ -5,7 +5,7 @@ const API_BASE_URL = "http://localhost:8000/api/score"
 export const addScore = async (user_id: string, anime_id: number, score: number): Promise<{ msg: string; error: string }> => {
   // remove score first
   const getResult = await getScore(user_id, anime_id)
-  if (getResult.score !== -1) {
+  if (getResult.score !== null) {
     const result = await removeScore(user_id, anime_id)
       if (result.msg === "failure") {
         return {

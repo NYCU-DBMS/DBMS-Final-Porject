@@ -36,7 +36,11 @@ export const Score = ({ user_id, currentAnimeId }: ScoreProps) => {
 
     setIsOperationLoading(true);
     try {
-      await addScore(user_id, currentAnimeId, Number(inputScore));
+      const result = await addScore(user_id, currentAnimeId, Number(inputScore));
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
       setScore(Number(inputScore));
       setInputScore('');
     } catch (error) {
