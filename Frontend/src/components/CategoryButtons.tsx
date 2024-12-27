@@ -6,9 +6,10 @@ interface CategoryButtonsProps {
   onCategorySelect: (ids: number[], category: string) => void
   selectedCategory: string
   sortType: string
+  isDisabled: boolean
 }
 
-const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: CategoryButtonsProps) => {
+const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType, isDisabled }: CategoryButtonsProps) => {
   const [categories, setCategories] = useState<string[]>([])
   const MAX_BUTTONS = 9
   // when the sortType changes, the animeIds will be updated based on the selected category and sortType
@@ -29,6 +30,7 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
   }, [sortType])
 
   const handleCategorySelect = async (category: string) => {
+    if (isDisabled) return
     try {
       const newAnimeIds = await fetchAnimeByCategoryAndSort(category, sortType)
       if (Array.isArray(newAnimeIds)) {
@@ -46,10 +48,10 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
   const getButtonClass = (category: string) => {
     const baseClass = 'h-10 min-w-[120px] flex items-center justify-center rounded transition-all text-sm font-medium truncate px-4'
     return `${baseClass} ${
-      selectedCategory === category && category !== ''
+      category !== "" && selectedCategory === category && !isDisabled
         ? 'bg-blue-600 hover:bg-blue-700'
         : 'bg-gray-700 hover:bg-gray-600'
-    }`;
+    } ${isDisabled ? 'cursor-not-allowed opacity-50' : ''}`
   }
 
   const visibleCategories = categories.slice(0, MAX_BUTTONS)
@@ -65,6 +67,7 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
               className={getButtonClass(category)}
               title={category}
               onClick={() => handleCategorySelect(category)}
+              disabled={isDisabled}
             >
               {truncateText(category)}
             </button>
@@ -78,6 +81,7 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
               className={getButtonClass(category)}
               title={category}
               onClick={() => handleCategorySelect(category)}
+              disabled={isDisabled}
             >
               {truncateText(category)}
             </button>
@@ -86,8 +90,11 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
           <div className="relative">
             <select
               className={`${getButtonClass(selectedCategory)} w-full appearance-none pr-10 text-center`}
-              onChange={(e) => handleCategorySelect(e.target.value)}
-              value={selectedCategory === "More" ? "" : selectedCategory}
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                handleCategorySelect(selectedValue === "" ? "" : selectedValue);
+              }}
+              value={remainingCategories.includes(selectedCategory) ? selectedCategory : ""}
             >
               <option value="">More</option>
               {remainingCategories.map((category) => (

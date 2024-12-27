@@ -92,6 +92,7 @@ export default function HomeComponent() {
           onCategorySelect={handleCategorySelect}
           selectedCategory={selectedCategory}
           sortType={sort}
+          isDisabled={search !== ""}
         />
         <div className="flex justify-center gap-5">
           <Input
@@ -100,6 +101,7 @@ export default function HomeComponent() {
             onChange={handleSearchChange}
             placeholder="Search anime..."
             className="w-full"
+            disabled={selectedCategory !== ""}
           />
           <select 
             name="sort" 
