@@ -4,6 +4,7 @@ import { fetchAnimeBySort } from "@/api/anime"
 import { fetchAnimeBySearchAndSort } from "@/api/anime"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import CategoryButtons from "./CategoryButtons"
 
 
 export default function HomeComponent() {
@@ -27,6 +28,7 @@ export default function HomeComponent() {
   return (
     <div>
       <div className="flex flex-col justify-center gap-5">
+        <CategoryButtons />
         <div className="flex justify-center gap-5">
           <Input
             type="text"
