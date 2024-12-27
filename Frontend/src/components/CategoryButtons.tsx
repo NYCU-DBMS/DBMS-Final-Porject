@@ -3,9 +3,9 @@ import { fetchCategory, fetchAnimeByCategoryAndSort } from '@/api/category'
 import { ChevronDown } from 'lucide-react'
 
 interface CategoryButtonsProps {
-  onCategorySelect: (ids: number[], category: string) => void;
-  selectedCategory: string;
-  sortType: string;
+  onCategorySelect: (ids: number[], category: string) => void
+  selectedCategory: string
+  sortType: string
 }
 
 const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: CategoryButtonsProps) => {
@@ -46,10 +46,10 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
   const getButtonClass = (category: string) => {
     const baseClass = 'h-10 min-w-[120px] flex items-center justify-center rounded transition-all text-sm font-medium truncate px-4'
     return `${baseClass} ${
-      selectedCategory === category 
-        ? 'bg-blue-600 hover:bg-blue-700' 
+      selectedCategory === category && category !== ''
+        ? 'bg-blue-600 hover:bg-blue-700'
         : 'bg-gray-700 hover:bg-gray-600'
-    }`
+    }`;
   }
 
   const visibleCategories = categories.slice(0, MAX_BUTTONS)
@@ -87,7 +87,7 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
             <select
               className={`${getButtonClass(selectedCategory)} w-full appearance-none pr-10 text-center`}
               onChange={(e) => handleCategorySelect(e.target.value)}
-              value={selectedCategory}
+              value={selectedCategory === "More" ? "" : selectedCategory}
             >
               <option value="">More</option>
               {remainingCategories.map((category) => (
