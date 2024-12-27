@@ -37,33 +37,52 @@ router.get('/', async (req, res) => {
 router.get('/:category', async (req, res) => {
     const category = req.params.category;
     const sortType = req.query.sort;
-    let sortMethod = ''
+    let sortMethod = '';
+    let query = '';
 
     switch (sortType) {
         case 'score_asc':
-            sortMethod = '"Score" ASC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Score" IS NOT NULL AND "Genres" ILIKE $1
+                ORDER BY "Score" ASC;
+            `;
             break;
+
         case 'score_desc':
-            sortMethod = '"Score" DESC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Score" IS NOT NULL AND "Genres" ILIKE $1
+                ORDER BY "Score" DESC;
+            `;
             break;
+
         case 'year_asc':
-            sortMethod =  '"Aired" ASC';
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Aired" IS NOT NULL AND "Aired" != 'Not available' AND "Genres" ILIKE $1
+                ORDER BY
+                    CAST(substring("Aired" FROM '\\d{4}') AS INT) ASC;
+            `;
             break;
+
         case 'year_desc':
-            sortMethod = '"Aired" DESC';;
+            query = `
+                SELECT "anime_id"
+                FROM anime_data
+                WHERE "Aired" IS NOT NULL AND "Aired" != 'Not available' AND "Genres" ILIKE $1
+                ORDER BY
+                    CAST(substring("Aired" FROM '\\d{4}') AS INT) DESC;
+            `;
             break;
+
         default:
             return res.status(400).json({ error: 'Invalid sort type' });
     }
-
     try {
-        const query = `
-            SELECT "anime_id"
-            FROM anime_data
-            WHERE "Genres" ILIKE $1
-            ORDER BY ${sortMethod};
-        `;
-
         const { rows } = await pool.query(query, [`%${category}%`]);
 
         if (rows.length === 0) {
