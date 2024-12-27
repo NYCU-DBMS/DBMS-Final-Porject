@@ -12,6 +12,24 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+const splitDates = (aired) => {
+    if (!aired) return { startDate: null, endDate: null };
+  
+    const parts = aired.split(' to ');
+    const startDate = DateToFormat(parts[0].trim());
+    const endDate = parts[1] ? DateToFormat(parts[1].trim()) : '?';
+  
+    return { startDate, endDate };
+};
+
+const DateToFormat = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date)) {
+      return null;
+    }
+    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+};
+
 router.get('/', (req, res) => {
     res.json({
         message: 'Anime API'
