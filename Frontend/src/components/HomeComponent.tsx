@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import AnimeGallery from "./AnimeGallery"
 import { fetchAnimeBySort, fetchAnimeBySearchAndSort } from "@/api/anime"
+import { fetchAnimeByCategoryAndSort } from "@/api/category"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import CategoryButtons from "./CategoryButtons"
@@ -22,14 +23,27 @@ export default function HomeComponent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
 
   const handleSubmit = async () => {
-    if (search === "") return
-    try {
-      const results = await fetchAnimeBySearchAndSort(search, sort)
-      setAnimeIds(results)
-      setSearchResults(results, search, sort)
-      setSelectedCategory("")
-    } catch (error) {
-      console.error("Search error:", error)
+    // two cases: search is empty and selectedCategory is empty
+    // if search is empty and selectedCategory is not empty, we should fetch anime by category
+    // if search is not empty, we should fetch anime by search
+
+    if (search === "" && selectedCategory !== "") {
+      try {
+        const results = await fetchAnimeByCategoryAndSort(selectedCategory, sort)
+        setAnimeIds(results)
+        setSearchResults(results, "", sort)
+      } catch (error) {
+        console.error("Category error:", error)
+      }
+    } else {
+      try {
+        const results = await fetchAnimeBySearchAndSort(search, sort)
+        setAnimeIds(results)
+        setSearchResults(results, search, sort)
+        setSelectedCategory("")
+      } catch (error) {
+        console.error("Search error:", error)
+      }
     }
   }
 

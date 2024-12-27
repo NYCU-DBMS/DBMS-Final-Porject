@@ -11,6 +11,9 @@ interface CategoryButtonsProps {
 const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: CategoryButtonsProps) => {
   const [categories, setCategories] = useState<string[]>([])
   const MAX_BUTTONS = 9
+  // when the sortType changes, the animeIds will be updated based on the selected category and sortType
+  // the code below does not handle the case where the sortType changes
+  // updated code:
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -23,7 +26,7 @@ const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: Categ
       }
     }
     fetchCategories()
-  }, [])
+  }, [sortType])
 
   const handleCategorySelect = async (category: string) => {
     try {
