@@ -45,8 +45,7 @@ router.get('/all', async (req, res) => {
             query = `
                 SELECT "anime_id"
                 FROM anime_data
-                WHERE "Score" IS NOT NULL
-                ORDER BY "Score" ASC;
+                ORDER BY COALESCE("Score", 0) ASC;
             `;
             break;
 
@@ -54,8 +53,7 @@ router.get('/all', async (req, res) => {
             query = `
                 SELECT "anime_id"
                 FROM anime_data
-                WHERE "Score" IS NOT NULL
-                ORDER BY "Score" DESC;
+                ORDER BY COALESCE("Score", 0) DESC;
             `;
             break;
 
