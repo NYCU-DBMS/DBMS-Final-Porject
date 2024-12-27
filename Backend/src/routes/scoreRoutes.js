@@ -90,9 +90,9 @@ router.post('/add', async (req, res) => {
 });
 
 router.post('/getScore', async (req, res) => {
-    const { userId, animeId } = req.body;
+    const { userID, animeID } = req.body;
 
-    if (!userId || !animeId) {
+    if (!userID || !animeID) {
         return res.status(400).json({ msg: "failure", error: "Invalid request body" });
     }
 
@@ -101,7 +101,7 @@ router.post('/getScore', async (req, res) => {
             SELECT "rating"
             FROM user_rating
             WHERE "user_id" = $1 AND "anime_id" = $2;
-        `, [userId, animeId]);
+        `, [userID, animeID]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ msg: "failure", error: "No score found" });
