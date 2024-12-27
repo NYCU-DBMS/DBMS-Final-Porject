@@ -18,7 +18,7 @@ const checkFavoriteTableExist = async () => {
     if (!checkResult.rows[0].exists){
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS "Favorites_List" (
-                user_id INTEGER,
+                user_id UUID,
                 list_title VARCHAR(255),
                 anime_id INTEGER,
                 anime_title VARCHAR(255),
@@ -53,7 +53,7 @@ router.post('/create', async  (req: any, res: any) => {
         if (!checkResult.rows[0].exists){
             const createTableQuery = `
                 CREATE TABLE IF NOT EXISTS "Favorites_List" (
-                user_id INTEGER,
+                user_id UUID,
                 list_title VARCHAR(255),
                 anime_id INTEGER,
                 anime_title VARCHAR(255),
@@ -71,9 +71,9 @@ router.post('/create', async  (req: any, res: any) => {
             SELECT EXISTS(
                 SELECT *
                 FROM "Favorites_List"
-                WHERE user_id='${user_id}' AND list_title='${list_title}'
+                WHERE user_id=$1 AND list_title=$2
             );`;
-            checkListResult = await query(checkListQuery, []);            
+            checkListResult = await query(checkListQuery, [user_id, list_title]);            
         } catch(error){
             console.error("favorite/create: check list exist or not fail, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/create: check list exist or not fail"});
@@ -87,9 +87,9 @@ router.post('/create', async  (req: any, res: any) => {
             try{
                 const createListQuery = `
                     INSERT INTO "Favorites_List" (user_id, list_title, anime_id, anime_title, favorited_date)
-                    VALUES (${user_id}, '${list_title}', -1, '-1', '1970-01-01');
+                    VALUES ($1, $2, -1, '-1', '1970-01-01');
                 `;
-                await query(createListQuery, []);  
+                await query(createListQuery, [user_id, list_title]);  
                 console.log("favorite/create: Create List Success!");
                 return res.status(200).json({msg: "success", error: ""});              
             }catch(error){
@@ -118,15 +118,15 @@ router.post('/getUsersList', async  (req: any, res: any) => {
             const getUserListQuery = `
                     SELECT DISTINCT list_title
                     FROM "Favorites_List"
-                    WHERE user_id=${user_id};
+                    WHERE user_id=$1;
                 `;
-            const getResult: QueryResult = await query(getUserListQuery, []);  
+            const getResult: QueryResult = await query(getUserListQuery, [user_id]);  
             const list_titles = getResult.rows.map(row => row.list_title);
 
             console.log("favorite/getUsersList: Get User's List Success!");
             return res.status(200).json({list_titles: list_titles});              
         }catch(error){
-            console.error("favorite/getUsersList: CGet user's list, error: ", error);
+            console.error("favorite/getUsersList: Get user's list, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/getUsersList: Get user's list fail"});
         }
 
@@ -150,9 +150,9 @@ router.post('/insert', async  (req: any, res: any) => {
             SELECT EXISTS(
                 SELECT *
                 FROM "Favorites_List"
-                WHERE user_id=${user_id} AND list_title='${list_title}'
+                WHERE user_id=$1 AND list_title=$2
             );`;
-            checkListResult = await query(checkListQuery, []);            
+            checkListResult = await query(checkListQuery, [user_id, list_title]);            
         } catch(error){
             console.error("favorite/insert: check list exist or not fail, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/insert: check list exist or not fail"});
@@ -162,9 +162,9 @@ router.post('/insert', async  (req: any, res: any) => {
                 const animeNameQuery = `
                     SELECT "Name"
                     FROM anime_data_filtered
-                    WHERE anime_id=${anime_id};
+                    WHERE anime_id=$1;
                 `
-                const animeNameResult: QueryResult = await query(animeNameQuery, []);
+                const animeNameResult: QueryResult = await query(animeNameQuery, [anime_id]);
                 if(animeNameResult.rows.length == 0){
                     return res.status(400).json({msg: "", error: "anime not exist"});  
                 }
@@ -173,10 +173,10 @@ router.post('/insert', async  (req: any, res: any) => {
                 const formattedDate = now.format('YYYY-MM-DD');
                 const insertQuery = `
                 INSERT INTO "Favorites_List" (user_id, list_title, anime_id, anime_title, favorited_date)
-                VALUES (${user_id}, '${list_title}', ${anime_id}, '${anime_name}', '${formattedDate}');
+                VALUES ($1, $2, $3, $4, $5);
                 `;
                 console.log(insertQuery)
-                await query(insertQuery, []);        
+                await query(insertQuery, [user_id, list_title, anime_id, anime_name, formattedDate]);        
                 console.log("favorite/insert: insert success");
                 return res.status(200).json({msg: "success", error: ""});       
             } catch(error){
@@ -208,9 +208,9 @@ router.post('/deleteList', async  (req: any, res: any) => {
             SELECT EXISTS(
                 SELECT *
                 FROM "Favorites_List"
-                WHERE user_id=${user_id} AND list_title='${list_title}'
+                WHERE user_id=$1 AND list_title=$2
             );`;
-            checkListResult = await query(checkListQuery, []);            
+            checkListResult = await query(checkListQuery, [user_id, list_title]);            
         } catch(error){
             console.error("favorite/deleteList: check list exist or not fail, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/deleteList: check list exist or not fail"});
@@ -220,9 +220,9 @@ router.post('/deleteList', async  (req: any, res: any) => {
             try{
                 const deleteQuery = `
                     DELETE FROM "Favorites_List"
-                    WHERE user_id=${user_id} AND list_title='${list_title}';
+                    WHERE user_id=$1 AND list_title=$2;
                 `;
-                await query(deleteQuery, []);        
+                await query(deleteQuery, [user_id, list_title]);        
                 console.log("favorite/deleteList: Delete success");
                 return res.status(200).json({msg: "success", error: ""});       
             } catch(error){
@@ -254,9 +254,9 @@ router.post('/deleteAnime', async  (req: any, res: any) => {
             SELECT EXISTS(
                 SELECT *
                 FROM "Favorites_List"
-                WHERE user_id=${user_id} AND list_title='${list_title}'
+                WHERE user_id=$1 AND list_title=$2
             );`;
-            checkListResult = await query(checkListQuery, []);            
+            checkListResult = await query(checkListQuery, [user_id, list_title]);            
         } catch(error){
             console.error("favorite/deleteAnime: check list exist or not fail, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/deleteAnime: check list exist or not fail"});
@@ -266,9 +266,9 @@ router.post('/deleteAnime', async  (req: any, res: any) => {
             try{
                 const deleteQuery = `
                     DELETE FROM "Favorites_List"
-                    WHERE user_id=${user_id} AND list_title='${list_title}' AND anime_id=${anime_id};
+                    WHERE user_id=$1 AND list_title=$2 AND anime_id=$3;
                 `;
-                await query(deleteQuery, []);        
+                await query(deleteQuery, [user_id, list_title, anime_id]);        
                 console.log("favorite/deleteAnime: Delete anime success");
                 return res.status(200).json({msg: "success", error: ""});       
             } catch(error){
@@ -300,9 +300,9 @@ router.post('/getList', async  (req: any, res: any) => {
             SELECT EXISTS(
                 SELECT *
                 FROM "Favorites_List"
-                WHERE user_id=${user_id} AND list_title='${list_title}'
+                WHERE user_id=$1 AND list_title=$2
             );`;
-            checkListResult = await query(checkListQuery, []);            
+            checkListResult = await query(checkListQuery, [user_id, list_title]);            
         } catch(error){
             console.error("favorite/getList: check list exist or not fail, error: ", error);
             return res.status(400).json({msg: "", error: "favorite/getList: check list exist or not fail"});
@@ -313,9 +313,9 @@ router.post('/getList', async  (req: any, res: any) => {
                 const getQuery = `
                     SELECT *
                     FROM "Favorites_List"
-                    WHERE user_id=${user_id} AND list_title='${list_title}' AND anime_id<>-1;
+                    WHERE user_id=$1 AND list_title=$2 AND anime_id<>-1;
                 `;
-                const getResult: QueryResult = await query(getQuery, []);
+                const getResult: QueryResult = await query(getQuery, [user_id, list_title]);
                 const anime_ids = getResult.rows.map(row => row.anime_id);
                 const anime_titles = getResult.rows.map(row => row.anime_title)
                 console.log("favorite/getList: getList success");
