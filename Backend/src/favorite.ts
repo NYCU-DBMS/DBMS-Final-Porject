@@ -18,7 +18,7 @@ const checkFavoriteTableExist = async () => {
     if (!checkResult.rows[0].exists){
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS "Favorites_List" (
-                user_id UUID,
+                user_id INTEGER,
                 list_title VARCHAR(255),
                 anime_id INTEGER,
                 anime_title VARCHAR(255),
@@ -53,7 +53,7 @@ router.post('/create', async  (req: any, res: any) => {
         if (!checkResult.rows[0].exists){
             const createTableQuery = `
                 CREATE TABLE IF NOT EXISTS "Favorites_List" (
-                user_id UUID,
+                user_id INTEGER,
                 list_title VARCHAR(255),
                 anime_id INTEGER,
                 anime_title VARCHAR(255),
@@ -161,7 +161,7 @@ router.post('/insert', async  (req: any, res: any) => {
             try{
                 const animeNameQuery = `
                     SELECT "Name"
-                    FROM anime_data_filtered
+                    FROM anime_data
                     WHERE anime_id=$1;
                 `
                 const animeNameResult: QueryResult = await query(animeNameQuery, [anime_id]);
@@ -290,6 +290,8 @@ router.post('/deleteAnime', async  (req: any, res: any) => {
 router.post('/getList', async  (req: any, res: any) => {
     try {
         const {user_id, list_title} = req.body
+        console.log('user_id:', user_id, 'list_title:', list_title);
+
         if(!user_id || !list_title){
             return res.status(400).json({msg: "", error: "favorite/getList: No user_id or list_title"});
         }
