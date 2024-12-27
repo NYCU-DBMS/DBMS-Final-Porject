@@ -45,7 +45,7 @@ export const removeScore = async (user_id: string, anime_id: number): Promise<{ 
 }
 
 
-export const getScore = async (user_id: string, anime_id: number): Promise<{ score: number }> => {
+export const getScore = async (user_id: string, anime_id: number): Promise<{ score: number | null }> => {
   try {
     const response = await axios.post(`${API_BASE_URL}/getScore`, {
       userID: user_id,
@@ -54,7 +54,7 @@ export const getScore = async (user_id: string, anime_id: number): Promise<{ sco
     return response.data
   } catch (error: any) {
     return {
-      score: -1,
+      score: null
     }
   }
 }
