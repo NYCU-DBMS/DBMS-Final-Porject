@@ -10,8 +10,6 @@ interface AnimeGalleryProps {
 }
 
 export default function AnimeGallery({ animeIds }: AnimeGalleryProps) {
-  // AnimeGallery.tsx:15 Uncaught TypeError: animeIds.slice is not a function at AnimeGallery
-
   if (!animeIds) {
     return <div>Loading...</div>
   }
@@ -27,12 +25,17 @@ export default function AnimeGallery({ animeIds }: AnimeGalleryProps) {
   }, [animeIds])
   if (!currAnimeIds) return <div>Loading...</div>
   return (
-    <div className="gallery grid grid-cols-3 gap-4">
+    <div className="gallery grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
       {
         currAnimeIds.map((id) => (
-          <div key={id} className="flex flex-col items-center">
-            <Link to={`/anime/${id}`}>
-              <AnimeImage animeId={id} />
+          <div key={id} className="group relative flex flex-col items-center transform transition-all duration-300 hover:scale-105">
+            <Link to={`/anime/${id}`} className="w-full">
+              <div className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="relative aspect-[3/4]">
+                  <AnimeImage animeId={id} />
+                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                </div>
+              </div>
             </Link>
           </div>
         ))
