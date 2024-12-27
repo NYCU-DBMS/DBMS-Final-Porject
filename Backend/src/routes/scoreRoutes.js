@@ -44,7 +44,7 @@ router.post("/remove", async (req, res) => {
         await pool.query(`
             UPDATE anime_data
             SET "Score" = CASE 
-                    WHEN "Scored_By" - 1 = 0 THEN NULLz
+                    WHEN "Scored_By" - 1 = 0 THEN NULL
                     ELSE ((COALESCE("Score", 0) * COALESCE("Scored_By", 0)) - $1) / (COALESCE("Scored_By", 0) - 1)
                 END,
                 "Scored_By" = GREATEST(COALESCE("Scored_By", 0) - 1, 0)
