@@ -27,11 +27,6 @@ interface Anime {
   Image_URL: string
 }
 
-interface FavoriteList {
-  anime_id: number[]
-  anime_name: string[]
-}
-
 const defaultAnime: Anime = {
   Name: '',
   Score: 0,
@@ -52,7 +47,6 @@ export default function AnimePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
   const [userLists, setUserLists] = useState<string[]>([])
-  const [selectedList, setSelectedList] = useState<string>("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [animeInLists, setAnimeInLists] = useState<string[]>([]);
