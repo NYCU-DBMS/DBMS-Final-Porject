@@ -47,18 +47,18 @@ export default function FavoriteList() {
           throw new Error(result.error);
         }
 
-        // 如果沒有任何清單，創建默認的"我的收藏"清單
+        // 如果沒有任何清單，創建默認的"快速收藏"清單
         if (!result.list_titles || result.list_titles.length === 0) {
           console.log("No lists found, creating default list");
           try {
-            await createFavoriteList(user.user_id, "我的收藏"); 
+            await createFavoriteList(user.user_id, "快速收藏"); 
             // 重新獲取清單
             const updatedResult = await getUsersList(user.user_id); 
             if (updatedResult.error) {
               throw new Error(updatedResult.error);
             }
             setUserLists(updatedResult.list_titles);
-            setSelectedList("我的收藏");
+            setSelectedList("快速收藏");
           } catch (err) {
             console.error("Error creating default list:", err);
             throw new Error("無法創建默認收藏清單");

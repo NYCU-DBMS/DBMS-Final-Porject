@@ -11,14 +11,14 @@ import {
 } from "@/api/favorite"
 import { useAuthStore } from "@/store"
 import AnimeImage from "@/components/AnimeImage"
-import { FaHeart, FaRegHeart, FaPlus } from "react-icons/fa"
+import { FaHeart, FaRegHeart, FaPlus, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io"
 import toast from 'react-hot-toast'
 
 interface Anime {
   Name: string
   Score: number
-  Category: string[]
+  Category: string | string[]
   Description: string
   Type: string
   Episodes: number
@@ -32,37 +32,111 @@ interface FavoriteList {
   anime_name: string[]
 }
 
+const defaultAnime: Anime = {
+  Name: '',
+  Score: 0,
+  Category: [],
+  Description: '',
+  Type: '',
+  Episodes: 0,
+  Air_Date: '',
+  End_Date: '',
+  Image_URL: ''
+};
+
 export default function AnimePage() {
   const { user, isLoggedIn } = useAuthStore()
   const { id } = useParams<{id: string}>()
   const numberId = Number(id)
-  const [currentAnime, setCurrentAnime] = useState<Anime>()
+  const [currentAnime, setCurrentAnime] = useState<Anime>(defaultAnime)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
   const [userLists, setUserLists] = useState<string[]>([])
   const [selectedList, setSelectedList] = useState<string>("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [animeInLists, setAnimeInLists] = useState<string[]>([]);
+  
+
+  const formatCategory = (category: string | string[] | undefined): string => {
+    if (!category) return '無類型信息';
+    if (Array.isArray(category)) return category.join(", ");
+    if (typeof category === 'string') {
+      if (category.includes(',')) return category;
+      if (category.includes('|')) return category.split('|').join(", ");
+      return category;
+    }
+    return '無類型信息';
+  };
+
+  const checkAnimeInLists = async () => {
+    if (!isLoggedIn || !user?.user_id) return;
+  
+    try {
+      const promises = userLists.map(async (list) => {
+        const result = await getFavoriteList(user.user_id, list);
+        if (!result.error && result.anime_id.includes(numberId)) {
+          return list;
+        }
+        return null;
+      });
+  
+      const results = await Promise.all(promises);
+      const containingLists = results.filter((list): list is string => list !== null);
+      setAnimeInLists(containingLists);
+    } catch (err) {
+      console.error("Error checking anime lists:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (userLists.length > 0) {
+      checkAnimeInLists();
+    }
+  }, [userLists, numberId]);
 
   // 獲取動畫詳情
   useEffect(() => {
     const fetchAndSetAnime = async () => {
-      if (!id) return
-      
-      try {
-        setLoading(true)
-        const animeData = await fetchAnimeById(numberId)
-        setCurrentAnime(animeData)
-      } catch (err) {
-        console.error("Error fetching anime:", err)
-        setError("無法獲取動畫信息")
-        toast.error("無法獲取動畫信息")
-      } finally {
-        setLoading(false)
+      if (!id) {
+        console.log('No ID provided');
+        return;
       }
-    }
-    fetchAndSetAnime()
-  }, [id])
+      
+      console.log('Fetching anime with ID:', numberId);
+      try {
+        setLoading(true);
+        const animeData = await fetchAnimeById(numberId);
+        console.log('Fetched anime data:', animeData);
+        
+        // 處理 Category 數據
+        const processCategory = (category: string | string[] | unknown): string[] => {
+          if (typeof category === 'string') {
+            return category.split(',').map((cat: string) => cat.trim());
+          }
+          if (Array.isArray(category)) {
+            return category.map(String);
+          }
+          return [];
+        };
+  
+        const processedAnime = {
+          ...animeData,
+          Category: processCategory(animeData.Category)
+        };
+        
+        setCurrentAnime(processedAnime);
+        setError("");
+      } catch (err) {
+        console.error("Error fetching anime:", err);
+        setError("無法獲取動畫信息");
+        toast.error("無法獲取動畫信息");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAndSetAnime();
+  }, [id]);
 
   // 獲取用戶的收藏清單
   const fetchUserLists = async () => {
@@ -99,6 +173,7 @@ export default function AnimePage() {
       if (result.error) {
         throw new Error(result.error)
       }
+      setAnimeInLists(prev => [...prev, listTitle]);
       setIsModalOpen(false)
       setError("")
       toast.success(`已添加到「${listTitle}」`)
@@ -108,6 +183,25 @@ export default function AnimePage() {
       toast.error("添加失敗，請稍後再試")
     }
   }
+
+  const handleRemoveFromList = async (listTitle: string) => {
+    if (!isLoggedIn || !user?.user_id) {
+      toast.error("請先登入");
+      return;
+    }
+  
+    try {
+      const result = await deleteAnimeFromList(user.user_id, listTitle, numberId);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      setAnimeInLists(prev => prev.filter(list => list !== listTitle));
+      toast.success(`已從「${listTitle}」中移除`);
+    } catch (err) {
+      console.error("Error removing from list:", err);
+      toast.error("移除失敗，請稍後再試");
+    }
+  };
 
   const handleCreateNewList = async () => {
     if (!isLoggedIn || !user?.user_id) {
@@ -143,25 +237,40 @@ export default function AnimePage() {
       toast.error("請先登入")
       return
     }
-
+  
     try {
-      // 先嘗試添加到"我的收藏"
-      let result = await insertAnimeToList(user.user_id, "我的收藏", numberId)
-      
-      // 如果清單不存在，先創建
-      if (result.error?.includes("List not exist")) {
-        await createFavoriteList(user.user_id, "我的收藏")
-        result = await insertAnimeToList(user.user_id, "我的收藏", numberId)
+      if (animeInLists.includes("快速收藏")) {
+        // 如果已經在收藏中，則刪除
+        const result = await deleteAnimeFromList(user.user_id, "快速收藏", numberId)
+        if (result.error) {
+          throw new Error(result.error)
+        }
+        setAnimeInLists(prev => prev.filter(list => list !== "快速收藏"))
+        toast.success("已從快速收藏中移除")
+      } else {
+        // 如果不在收藏中，則添加
+        let result = await insertAnimeToList(user.user_id, "快速收藏", numberId)
+        
+        // 如果清單不存在，先創建
+        if (result.error?.includes("List not exist")) {
+          await createFavoriteList(user.user_id, "快速收藏")
+          result = await insertAnimeToList(user.user_id, "快速收藏", numberId)
+        }
+  
+        if (result.error) {
+          throw new Error(result.error)
+        }
+  
+        setAnimeInLists(prev => [...prev, "快速收藏"])
+        // 如果用戶清單中還沒有"我的收藏"，也要添加進去
+        if (!userLists.includes("快速收藏")) {
+          setUserLists(prev => [...prev, "快速收藏"])
+        }
+        toast.success("已添加到快速收藏")
       }
-
-      if (result.error) {
-        throw new Error(result.error)
-      }
-
-      toast.success("已添加到我的收藏")
     } catch (err) {
-      console.error("Error quick adding:", err)
-      toast.error("快速收藏失敗")
+      console.error("Error handling quick favorite:", err)
+      toast.error("操作失敗，請稍後再試")
     }
   }
 
@@ -183,7 +292,7 @@ export default function AnimePage() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 bg-white dark:bg-gray-900">
         <div className="flex flex-col md:flex-row items-start gap-8 max-w-6xl mx-auto">
           <div className="w-full md:w-1/3">
             <AnimeImage animeId={numberId} />
@@ -192,26 +301,39 @@ export default function AnimePage() {
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold dark:text-white">{currentAnime.Name}</h1>
               <div className="flex gap-2">
-                <button 
-                  onClick={handleQuickAdd}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  <FaHeart />
-                  快速收藏
-                </button>
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <FaPlus />
-                  添加到清單
-                </button>
-              </div>
+              <button 
+                onClick={handleQuickAdd}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                  ${animeInLists.includes("快速收藏")
+                    ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800'
+                    : 'bg-red-500 text-white hover:bg-red-600'
+                  }`}
+              >
+                {animeInLists.includes("快速收藏") ? (
+                  <>
+                    <FaHeart />
+                    取消收藏
+                  </>
+                ) : (
+                  <>
+                    <FaRegHeart />
+                    快速收藏
+                  </>
+                )}
+              </button>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                <FaPlus />
+                添加到清單
+              </button>
+            </div>
             </div>
             <div className="grid grid-cols-1 gap-3 dark:text-white">
               <p className="text-sm text-gray-600 dark:text-gray-300">ID: {numberId}</p>
               <p><strong>評分:</strong> {currentAnime.Score}</p>
-              <p><strong>類型:</strong> {currentAnime.Category.join(", ")}</p>
+              <p><strong>類型:</strong> {formatCategory(currentAnime.Category)}</p>
               <p className="max-w-prose"><strong>描述:</strong> {currentAnime.Description}</p>
               <p><strong>類別:</strong> {currentAnime.Type}</p>
               <p><strong>集數:</strong> {currentAnime.Episodes === -1 ? "連載中" : currentAnime.Episodes}</p>
@@ -266,20 +388,31 @@ export default function AnimePage() {
                   )}
 
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">選擇現有清單</h4>
-                    <div className="mt-2 space-y-2">
-                      {userLists.map((list) => (
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">選擇現有清單</h4>
+                  <div className="mt-2 space-y-2">
+                    {userLists.map((list) => {
+                      const isInList = animeInLists.includes(list);
+                      return (
                         <button
                           key={list}
-                          onClick={() => handleAddToList(list)}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                          onClick={() => isInList ? handleRemoveFromList(list) : handleAddToList(list)}
+                          className={`w-full text-left px-4 py-2 text-sm flex justify-between items-center
+                            ${isInList 
+                              ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200' 
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'} 
+                            rounded-lg`}
                         >
-                          {list}
+                          <span>{list}</span>
+                          {isInList ? (
+                            <FaTrash className="h-4 w-4" />
+                          ) : (
+                            <FaPlus className="h-4 w-4" />
+                          )}
                         </button>
-                      ))}
-                    </div>
+                      )
+                    })}
                   </div>
-
+                </div>
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">建立新清單</h4>
                     <div className="mt-2 flex gap-2">
