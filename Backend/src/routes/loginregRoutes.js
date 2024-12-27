@@ -57,8 +57,8 @@ router.post('/login', checkUsersTable, async (req, res) => {
         return res.status(401).json({ error: 'Invalid username or password' });
       }
 
-        // 有效登入時間 - 30分鐘
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
+        // 有效登入時間 - 1 jhour
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
       res.json({ message: 'Login successful', token });
     } catch (err) {
       console.error('Error during login:', err);
