@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
-import { fetchCategory } from '@/api/category'
+import { fetchCategory, fetchAnimeByCategoryAndSort } from '@/api/category'
 import { ChevronDown } from 'lucide-react'
 
-const CategoryButtons = () => {
-  const [categories, setCategories] = useState([])
+interface CategoryButtonsProps {
+  onCategorySelect: (ids: number[], category: string) => void;
+  selectedCategory: string;
+  sortType: string;
+}
+
+const CategoryButtons = ({ onCategorySelect, selectedCategory, sortType }: CategoryButtonsProps) => {
+  const [categories, setCategories] = useState<string[]>([])
   const MAX_BUTTONS = 9
 
   useEffect(() => {
@@ -19,50 +25,66 @@ const CategoryButtons = () => {
     fetchCategories()
   }, [])
 
-  const visibleCategories = categories.slice(0, MAX_BUTTONS)
-  const remainingCategories = categories.slice(MAX_BUTTONS)
+  const handleCategorySelect = async (category: string) => {
+    try {
+      const newAnimeIds = await fetchAnimeByCategoryAndSort(category, sortType)
+      if (Array.isArray(newAnimeIds)) {
+        onCategorySelect(newAnimeIds, category)
+      }
+    } catch (error) {
+      console.error('Error fetching anime by category:', error)
+    }
+  }
 
-  // Function to truncate text
   const truncateText = (text: string, maxLength = 10) => {
     return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text
   }
 
-  // Common button styles with truncation
-  const buttonBaseClass =
-    'h-10 min-w-[120px] flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 transition-all text-sm font-medium truncate px-4'
+  const getButtonClass = (category: string) => {
+    const baseClass = 'h-10 min-w-[120px] flex items-center justify-center rounded transition-all text-sm font-medium truncate px-4'
+    return `${baseClass} ${
+      selectedCategory === category 
+        ? 'bg-blue-600 hover:bg-blue-700' 
+        : 'bg-gray-700 hover:bg-gray-600'
+    }`
+  }
+
+  const visibleCategories = categories.slice(0, MAX_BUTTONS)
+  const remainingCategories = categories.slice(MAX_BUTTONS)
 
   return (
     <div className="text-white">
       <div className="space-y-4">
-        {/* First row - 5 buttons */}
         <div className="grid grid-cols-5 gap-4">
           {visibleCategories.slice(0, 5).map((category) => (
             <button
               key={category}
-              className={buttonBaseClass}
-              title={category} // Show full text on hover
+              className={getButtonClass(category)}
+              title={category}
+              onClick={() => handleCategorySelect(category)}
             >
               {truncateText(category)}
             </button>
           ))}
         </div>
 
-        {/* Second row - 4 buttons + select */}
         <div className="grid grid-cols-5 gap-4">
           {visibleCategories.slice(5).map((category) => (
             <button
               key={category}
-              className={buttonBaseClass}
-              title={category} // Show full text on hover
+              className={getButtonClass(category)}
+              title={category}
+              onClick={() => handleCategorySelect(category)}
             >
               {truncateText(category)}
             </button>
           ))}
 
-          {/* Select with custom arrow */}
           <div className="relative">
             <select
-              className={`${buttonBaseClass} w-full appearance-none pr-10 text-center`}
+              className={`${getButtonClass(selectedCategory)} w-full appearance-none pr-10 text-center`}
+              onChange={(e) => handleCategorySelect(e.target.value)}
+              value={selectedCategory}
             >
               <option value="">More</option>
               {remainingCategories.map((category) => (

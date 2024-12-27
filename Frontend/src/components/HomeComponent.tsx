@@ -19,6 +19,7 @@ export default function HomeComponent() {
   const [sort, setSort] = useState(savedSort)
   const [search, setSearch] = useState(savedKeyword)
   const [animeIds, setAnimeIds] = useState<number[]>(savedAnimeIds)
+  const [selectedCategory, setSelectedCategory] = useState<string>("")
 
   const handleSubmit = async () => {
     if (search === "") return
@@ -26,6 +27,7 @@ export default function HomeComponent() {
       const results = await fetchAnimeBySearchAndSort(search, sort)
       setAnimeIds(results)
       setSearchResults(results, search, sort)
+      setSelectedCategory("")
     } catch (error) {
       console.error("Search error:", error)
     }
@@ -33,7 +35,7 @@ export default function HomeComponent() {
 
   useEffect(() => {
     const fetchAnimes = async () => {
-      if (search === "") {
+      if (search === "" && selectedCategory === "") {
         try {
           const results = await fetchAnimeBySort(sort)
           setAnimeIds(results)
@@ -44,7 +46,7 @@ export default function HomeComponent() {
       }
     }
     fetchAnimes()
-  }, [sort, search, setSearchResults])
+  }, [sort, search, setSearchResults, selectedCategory])
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSort(e.target.value)
@@ -57,13 +59,26 @@ export default function HomeComponent() {
   const handleClear = () => {
     setSearch("")
     setSort("score_desc")
+    setSelectedCategory("")
     clearSearchResults()
   }
+
+  const handleCategorySelect = (newIds: number[], category: string) => {
+    setAnimeIds(newIds)
+    setSelectedCategory(category)
+    setSearchResults(newIds, "", sort) // Update store with category results
+    setSearch("") // Clear search when category is selected
+  }
+
 
   return (
     <div>
       <div className="flex flex-col justify-center gap-5">
-        <CategoryButtons />
+        <CategoryButtons 
+          onCategorySelect={handleCategorySelect}
+          selectedCategory={selectedCategory}
+          sortType={sort}
+        />
         <div className="flex justify-center gap-5">
           <Input
             type="text"
@@ -87,7 +102,7 @@ export default function HomeComponent() {
           <Button className="theme--dark" onClick={handleSubmit}>
             Search
           </Button>
-          {(search !== "" || sort !== "score_desc") && (
+          {(search !== "" || sort !== "score_desc" || selectedCategory !== "") && (
             <Button 
               variant="outline" 
               onClick={handleClear}
