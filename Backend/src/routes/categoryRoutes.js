@@ -45,8 +45,8 @@ router.get('/:category', async (req, res) => {
             query = `
                 SELECT "anime_id"
                 FROM anime_data
-                WHERE "Genres" ILIKE $1
-                ORDER BY COALESCE("Score", 0) ASC;
+                WHERE "Score" IS NOT NULL AND "Genres" ILIKE $1
+                ORDER BY "Score" ASC;
             `;
             break;
 
@@ -54,8 +54,8 @@ router.get('/:category', async (req, res) => {
             query = `
                 SELECT "anime_id"
                 FROM anime_data
-                WHERE "Genres" ILIKE $1
-                ORDER BY COALESCE("Score", 0) DESC;
+                WHERE "Score" IS NOT NULL AND "Genres" ILIKE $1
+                ORDER BY "Score" DESC;
             `;
             break;
 
