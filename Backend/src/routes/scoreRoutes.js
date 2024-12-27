@@ -82,17 +82,40 @@ router.post('/add', async (req, res) => {
             VALUES ($1, $2, $3)
         `,[user_id,anime_id,score]);
 
-        //update user_rating table
-        await pool.query(`
-            INSERT INTO user_rating ("username", "anime_id", "rating")
-            VALUES ($1, $2, $3)
-        `,[user_id,anime_id,score]);
-
         res.json({msg: "success", error: null});
     } catch (err) {
         console.error('Error adding score', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.post('/getScore', async (req, res) => {
+    const { userId, animeId } = req.body;
+
+    if (!userId || !animeId) {
+        return res.status(400).json({ msg: "failure", error: "Invalid request body" });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT "rating"
+            FROM user_rating
+            WHERE "user_id" = $1 AND "anime_id" = $2;
+        `, [userId, animeId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ msg: "failure", error: "No score found" });
+        }
+
+        res.json({
+            score: result.rows[0].rating,
+        });
+
+    } catch (err) {
+        console.error('Error fetching score:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 export const scoreRoutes = router; 
