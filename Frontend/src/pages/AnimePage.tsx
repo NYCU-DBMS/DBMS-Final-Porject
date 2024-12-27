@@ -9,8 +9,10 @@ import {
   createFavoriteList,
   getUsersList
 } from "@/api/favorite"
+import { addScore, removeScore } from "@/api/score"
 import { useAuthStore } from "@/store"
 import AnimeImage from "@/components/AnimeImage"
+import { Score } from '@/components/Score'
 import { FaHeart, FaRegHeart, FaPlus, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io"
 import toast from 'react-hot-toast'
@@ -50,7 +52,48 @@ export default function AnimePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [animeInLists, setAnimeInLists] = useState<string[]>([]);
+  const [userScore, setUserScore] = useState<number>(0)
   
+  const handleScoreChange = async (score: number) => {
+    if (!isLoggedIn || !user?.user_id) {
+      toast.error("請先登入");
+      return;
+    }
+
+    try {
+      const result = await addScore(user.user_id, numberId, score);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      setUserScore(Number(score)); // 更新用戶評分
+      setCurrentAnime((prev) => ({ ...prev, Score: Number(score) }));
+      toast.success("評分成功");
+    } catch (err) {
+      console.error("Error adding score:", err);
+      toast.error("評分失敗，請稍後再試");
+    }
+  };
+
+  const handleRemoveScore = async () => {
+    if (!isLoggedIn || !user?.user_id) {
+      toast.error("請先登入");
+      return;
+    }
+
+    try {
+      const result = await removeScore(user.user_id, numberId);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      setUserScore(0); // 清除用戶評分
+      setCurrentAnime((prev) => ({ ...prev, Score: 0 }));
+      toast.success("評分已移除");
+    } catch (err) {
+      console.error("Error removing score:", err);
+      toast.error("移除評分失敗，請稍後再試");
+    }
+  };
+
 
   const formatCategory = (category: string | string[] | undefined): string => {
     if (!category) return '無類型信息';
@@ -335,6 +378,14 @@ export default function AnimePage() {
               <p><strong>結束日期:</strong> {currentAnime.End_Date === "?" ? "尚未結束" : currentAnime.End_Date}</p>
             </div>
           </div>
+        </div>
+        <div className="mt-8">
+          <Score
+            currentScore={userScore}
+            onScoreChange={handleScoreChange}
+            onRemoveScore={handleRemoveScore}
+          />
+
         </div>
       </div>
 
