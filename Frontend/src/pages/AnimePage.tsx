@@ -345,7 +345,7 @@ export default function AnimePage() {
               currentAnimeId={numberId}
             />
           )}
-          <Comment username={user?.username} currentAnimeId={numberId} />
+          <Comment user_id={user?.user_id} username={user?.username} currentAnimeId={numberId} />
         </div>
       </div>
 
