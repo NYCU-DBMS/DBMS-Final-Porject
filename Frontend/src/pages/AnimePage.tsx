@@ -15,6 +15,7 @@ import { Score } from '@/components/Score'
 import { FaHeart, FaRegHeart, FaPlus, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io"
 import toast from 'react-hot-toast'
+import { Comment } from "@/components/Comment"
 
 interface Anime {
   Name: string
@@ -344,7 +345,7 @@ export default function AnimePage() {
               currentAnimeId={numberId}
             />
           )}
-
+          <Comment user_id={user?.user_id} currentAnimeId={numberId} />
         </div>
       </div>
 
