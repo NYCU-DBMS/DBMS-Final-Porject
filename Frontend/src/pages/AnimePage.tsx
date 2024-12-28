@@ -278,71 +278,134 @@ export default function AnimePage() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 bg-white dark:bg-gray-900">
-        <div className="flex flex-col md:flex-row items-start gap-8 max-w-6xl mx-auto">
-          <div className="w-full md:w-1/3 space-y-4">
-            <AnimeImage animeId={numberId} />
-            {user?.user_id && (
-              <Score
-                user_id={user.user_id}
-                currentAnimeId={numberId}
-              />
-            )}
-          </div>
-          
-          <div className="flex flex-col gap-4 w-full md:w-2/3">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold dark:text-white">{currentAnime.Name}</h1>
-              <div className="flex gap-2">
-                <button 
-                  onClick={handleQuickAdd}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
-                    ${animeInLists.includes("快速收藏")
-                      ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800'
-                      : 'bg-red-500 text-white hover:bg-red-600'
-                    }`}
-                >
-                  {animeInLists.includes("快速收藏") ? (
-                    <>
-                      <FaHeart />
-                      取消收藏
-                    </>
-                  ) : (
-                    <>
-                      <FaRegHeart />
-                      快速收藏
-                    </>
-                  )}
-                </button>
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <FaPlus />
-                  添加到清單
-                </button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            {/* 主要內容區塊 */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+              <div className="flex flex-col md:flex-row">
+                {/* 左側區塊 - 圖片和評分 */}
+                <div className="w-full md:w-1/3 p-6 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="sticky top-6 space-y-6">
+                    <div className="rounded-lg overflow-hidden shadow-md">
+                      <AnimeImage animeId={numberId} />
+                    </div>
+                    {user?.user_id && (
+                      <Score
+                        user_id={user.user_id}
+                        currentAnimeId={numberId}
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* 右側區塊 - 詳細信息 */}
+                <div className="flex-1 p-6 md:border-l border-gray-200 dark:border-gray-700">
+                  {/* 標題和按鈕區 */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {currentAnime.Name}
+                    </h1>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={handleQuickAdd}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all transform hover:scale-105
+                          ${animeInLists.includes("快速收藏")
+                            ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800/50'
+                            : 'bg-red-500 text-white hover:bg-red-600 shadow-md hover:shadow-lg'
+                          }`}
+                      >
+                        {animeInLists.includes("快速收藏") ? (
+                          <>
+                            <FaHeart className="text-lg" />
+                            <span className="font-medium">已收藏</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaRegHeart className="text-lg" />
+                            <span className="font-medium">收藏</span>
+                          </>
+                        )}
+                      </button>
+                      <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg 
+                                 hover:bg-gray-700 transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
+                      >
+                        <FaPlus />
+                        <span className="font-medium">加入清單</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 資訊卡片 */}
+                  <div className="grid gap-6">
+                    {/* 基本資訊卡片 */}
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">ID:</span>
+                            <span className="text-gray-900 dark:text-gray-100">{numberId}</span>
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">評分:</span>
+                            <span className="text-gray-900 dark:text-gray-100">{currentAnime.Score}</span>
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">類別:</span>
+                            <span className="text-gray-900 dark:text-gray-100">{currentAnime.Type}</span>
+                          </p>
+                        </div>
+                        <div className="space-y-3">
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">集數:</span>
+                            <span className="text-gray-900 dark:text-gray-100">
+                              {currentAnime.Episodes === -1 ? "連載中" : currentAnime.Episodes}
+                            </span>
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">開播:</span>
+                            <span className="text-gray-900 dark:text-gray-100">{currentAnime.Air_Date}</span>
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <span className="text-gray-500 dark:text-gray-400 font-medium min-w-[80px]">結束:</span>
+                            <span className="text-gray-900 dark:text-gray-100">
+                              {currentAnime.End_Date === "?" ? "尚未結束" : currentAnime.End_Date}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 類型標籤 */}
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">類型</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {formatCategory(currentAnime.Category).split(", ").map((category, index) => (
+                          <span 
+                            key={index}
+                            className="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 
+                                     rounded-full text-sm font-medium"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 描述卡片 */}
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">描述</h3>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {currentAnime.Description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 dark:text-white">
-              <p className="text-sm text-gray-600 dark:text-gray-300">ID: {numberId}</p>
-              <p><strong>評分:</strong> {currentAnime.Score}</p>
-              <p><strong>類型:</strong> {formatCategory(currentAnime.Category)}</p>
-              <p className="max-w-prose"><strong>描述:</strong> {currentAnime.Description}</p>
-              <p><strong>類別:</strong> {currentAnime.Type}</p>
-              <p><strong>集數:</strong> {currentAnime.Episodes === -1 ? "連載中" : currentAnime.Episodes}</p>
-              <p><strong>開播日期:</strong> {currentAnime.Air_Date}</p>
-              <p><strong>結束日期:</strong> {currentAnime.End_Date === "?" ? "尚未結束" : currentAnime.End_Date}</p>
-            </div>
           </div>
-        </div>
-        <div className="mt-8">
-          {user?.user_id && (
-            <Score
-              user_id={user.user_id}
-              currentAnimeId={numberId}
-            />
-          )}
-
         </div>
       </div>
 
