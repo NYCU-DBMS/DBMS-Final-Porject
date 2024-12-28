@@ -86,11 +86,9 @@ export const Comment = ({ user_id, username, currentAnimeId }: CommentProps) => 
   return (
     <div className="flex flex-col items-center w-full max-w-3xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Comments</h1>
-      
-      {/* Comment Input Section */}
       {username && (
         <form onSubmit={handleSubmit} className="w-full mb-8">
-          <div className="flex flex-col gap-3">
+          <div className="relative">
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
@@ -99,20 +97,33 @@ export const Comment = ({ user_id, username, currentAnimeId }: CommentProps) => 
                        focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        transition-all duration-200 ease-in-out
                        dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                       dark:placeholder-gray-400"
+                       dark:placeholder-gray-400
+                       pb-14"
               rows={4}
               disabled={isSubmitting}
             />
             <button
               type="submit"
               disabled={isSubmitting || !newComment.trim()}
-              className="self-end px-6 py-2.5 rounded-lg font-medium
-                       bg-blue-600 text-white hover:bg-blue-700
-                       transition-colors duration-200
-                       disabled:bg-gray-400 disabled:cursor-not-allowed
-                       shadow-sm hover:shadow-md"
+              className="absolute bottom-3 right-3 w-10 h-10 rounded-full
+                       flex items-center justify-center
+                       transition-all duration-200 ease-in-out
+                       disabled:bg-gray-300 disabled:cursor-not-allowed
+                       disabled:text-gray-400
+                       enabled:bg-blue-600 enabled:hover:bg-blue-700
+                       enabled:text-white"
+              aria-label="Submit comment"
             >
-              {isSubmitting ? "Posting..." : "Post Comment"}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="currentColor" 
+                className="w-5 h-5"
+              >
+                <path 
+                  d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"
+                />
+              </svg>
             </button>
           </div>
         </form>
