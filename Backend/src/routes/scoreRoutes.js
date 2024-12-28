@@ -59,7 +59,8 @@ router.post("/remove", checkRatingTable, async (req, res) => {
             DELETE FROM our_user_rating WHERE "user_id" = $1 AND "anime_id" = $2
         `, [user_id, anime_id]);
 
-        await pool.query(`
+        // 修改這個查詢以返回新的評分
+        const updateResult = await pool.query(`
             UPDATE anime_data
             SET "Score" = CASE 
                     WHEN "Scored_By" - 1 = 0 THEN NULL
@@ -67,9 +68,16 @@ router.post("/remove", checkRatingTable, async (req, res) => {
                 END,
                 "Scored_By" = GREATEST(COALESCE("Scored_By", 0) - 1, 0)
             WHERE "anime_id" = $2
+            RETURNING "Score"
         `, [score, anime_id]);
 
-        res.json({ msg: "success", error: null });
+        const newTotalScore = updateResult.rows[0].Score;
+
+        res.json({ 
+            msg: "success", 
+            error: null,
+            totalScore: newTotalScore 
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ msg: "failure", error: "Internal server error" });
@@ -84,26 +92,35 @@ router.post('/add', checkRatingTable, async (req, res) => {
     }
 
     try {
-        //update score related info in anime_data table
-        await pool.query(`
+        // 修改這個查詢以返回新的評分
+        const updateResult = await pool.query(`
             UPDATE anime_data
             SET "Score" = (
                 ((COALESCE("Score", 0) * COALESCE("Scored_By", 0)) + $1) / (COALESCE("Scored_By", 0) + 1)
             ),
             "Scored_By" = COALESCE("Scored_By", 0) + 1
             WHERE "anime_id" = $2
+            RETURNING "Score"
         `,[score, anime_id]);
 
-        //update user_rating table
         await pool.query(`
             INSERT INTO our_user_rating ("user_id", "anime_id", "rating")
             VALUES ($1, $2, $3)
-        `,[user_id,anime_id,score]);
+        `,[user_id, anime_id, score]);
 
-        res.json({msg: "success", error: null});
+        const newTotalScore = updateResult.rows[0].Score;
+
+        res.json({
+            msg: "success", 
+            error: null,
+            totalScore: newTotalScore
+        });
     } catch (err) {
         console.error('Error adding score', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ 
+            msg: "failure", 
+            error: 'Internal Server Error' 
+        });
     }
 });
 
@@ -135,5 +152,4 @@ router.post('/getScore', checkRatingTable, async (req, res) => {
     }
 });
 
-
-export const scoreRoutes = router; 
+export const scoreRoutes = router;
