@@ -15,6 +15,7 @@ import { Score } from '@/components/Score'
 import { FaHeart, FaRegHeart, FaPlus, FaTrash } from "react-icons/fa"
 import { IoMdClose } from "react-icons/io"
 import toast from 'react-hot-toast'
+import { Comment } from "@/components/Comment"
 
 interface Anime {
   Name: string
@@ -322,31 +323,26 @@ export default function AnimePage() {
                 </button>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 gap-4 dark:text-white">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">ID: {numberId}</p>
-                <p className="mt-2"><strong>評分:</strong> {currentAnime.Score}</p>
-                <p className="mt-2"><strong>類型:</strong> {formatCategory(currentAnime.Category)}</p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h2 className="font-semibold mb-2">描述</h2>
-                <p className="text-gray-700 dark:text-gray-300">{currentAnime.Description}</p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 grid grid-cols-2 gap-4">
-                <div>
-                  <p><strong>類別:</strong> {currentAnime.Type}</p>
-                  <p><strong>集數:</strong> {currentAnime.Episodes === -1 ? "連載中" : currentAnime.Episodes}</p>
-                </div>
-                <div>
-                  <p><strong>開播日期:</strong> {currentAnime.Air_Date}</p>
-                  <p><strong>結束日期:</strong> {currentAnime.End_Date === "?" ? "尚未結束" : currentAnime.End_Date}</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-3 dark:text-white">
+              <p className="text-sm text-gray-600 dark:text-gray-300">ID: {numberId}</p>
+              <p><strong>評分:</strong> {currentAnime.Score}</p>
+              <p><strong>類型:</strong> {formatCategory(currentAnime.Category)}</p>
+              <p className="max-w-prose"><strong>描述:</strong> {currentAnime.Description}</p>
+              <p><strong>類別:</strong> {currentAnime.Type}</p>
+              <p><strong>集數:</strong> {currentAnime.Episodes === -1 ? "連載中" : currentAnime.Episodes}</p>
+              <p><strong>開播日期:</strong> {currentAnime.Air_Date}</p>
+              <p><strong>結束日期:</strong> {currentAnime.End_Date === "?" ? "尚未結束" : currentAnime.End_Date}</p>
             </div>
           </div>
+        </div>
+        <div className="mt-8">
+          {user?.user_id && (
+            <Score
+              user_id={user.user_id}
+              currentAnimeId={numberId}
+            />
+          )}
+
         </div>
       </div>
 

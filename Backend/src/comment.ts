@@ -50,7 +50,7 @@ router.post('/add', async  (req: any, res: any) => {
             if (getUsernameResult.rows.length==0){
                 return res.status(400).json({error: "User ID not exist"});
             }
-            const username = getUsernameResult.rows[0].Username;
+            const username = getUsernameResult.rows[0].username;
             const addCommentQuery = `
                 INSERT INTO "Comment" (anime_id, user_id, username, content)
                 VALUES (${anime_id}, ${user_id}, '${username}', '${content}');

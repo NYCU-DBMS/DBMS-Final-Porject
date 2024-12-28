@@ -8,7 +8,7 @@ interface Anime {
 // 過濾條件
 const filterUrls = ["https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png"]
 const filterIds = [13405, 10742, 31586]
-const maxResults = 50
+const maxResults = 100
 
 /**
  * 判斷是否需要排除的動畫。
