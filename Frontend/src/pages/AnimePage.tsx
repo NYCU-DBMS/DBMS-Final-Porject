@@ -401,6 +401,16 @@ export default function AnimePage() {
                         {currentAnime.Description}
                       </p>
                     </div>
+                    <div className="border-t border-gray-200 dark:border-gray-700">
+                      <div className="p-6">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">評論區</h2>
+                        <Comment 
+                          user_id={user?.user_id}
+                          username={user?.username}
+                          currentAnimeId={numberId}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
