@@ -40,13 +40,3 @@ npm run dev
 
 (可以到http://localhost:8000/dbtest/connection 看有沒有連上資料庫)
 (接著到http://localhost:8000/dbinit/importCSV 把CSV資料灌進資料庫，要等一段時間)
-
-### DataBase(建立users table測試auth功能)
-```sql
-CREATE TABLE Users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-);
-```
