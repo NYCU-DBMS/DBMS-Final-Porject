@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useAuthStore, AuthState } from '@/store'
+import { useAuthStore } from '@/store'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
-  error?: string
 }
 
-export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) => {
-  const { register } = useAuthStore((state: AuthState) => state)
+export const NewRegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
+  const { register } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (password !== confirmPassword) {
@@ -28,29 +28,45 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
       })
       return
     }
-    console.log(username, email, password)
-    register(username, email, password)
-    // if success, switch to login
-    toast.success('註冊成功！', {
-      duration: 2000,
-      position: 'top-center',
-      style: {
-        background: '#22c55e',
-        color: '#fff',
-      },
-    })
-    onSwitchToLogin() 
-  }
+  
+    try {
+      setIsSubmitting(true)
+      await register(username, email, password)
+      
+      toast.success('註冊成功！', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#22c55e',
+          color: '#fff',
+        },
+      })
+      onSwitchToLogin()
+      
+    } catch (error: any) {
+      const errorMessage = error.message || '註冊失敗，請稍後再試'
+      toast.error(errorMessage, {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        },
+      })
+      switch (errorMessage) {
+        case '用戶名已存在':
+          setUsername('')
+          break
+        case 'Email已被註冊':
+          setEmail('')
+          break
+        default:
+          break
+      }
 
-  if (error) {
-    toast.error(error, {
-      duration: 2000,
-      position: 'top-center',
-      style: {
-        background: '#ef4444',
-        color: '#fff',
-      },
-    })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -68,6 +84,7 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
           onChange={(e) => setUsername(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
           required
+          disabled={isSubmitting}
         />
       </div>
 
@@ -82,6 +99,7 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
           required
+          disabled={isSubmitting}
         />
       </div>
 
@@ -96,6 +114,7 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
           required
+          disabled={isSubmitting}
         />
       </div>
 
@@ -110,14 +129,18 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
           required
+          disabled={isSubmitting}
         />
       </div>
 
       <button
         type="submit"
-        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+        disabled={isSubmitting}
+        className={`w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+          isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       >
-        Register
+        {isSubmitting ? 'Registering...' : 'Register'}
       </button>
 
       <div className="text-center mt-4">
@@ -127,6 +150,7 @@ export const NewRegisterForm = ({ onSwitchToLogin, error }: RegisterFormProps) =
             type="button"
             onClick={onSwitchToLogin}
             className="text-blue-500 hover:text-blue-400 transition duration-200"
+            disabled={isSubmitting}
           >
             Sign in here
           </button>

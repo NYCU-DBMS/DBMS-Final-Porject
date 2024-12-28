@@ -36,12 +36,22 @@ export default function Profile() {
       })
       return
     }
+    if (passwords.newPassword.length < 4) {
+      toast.error("新密碼長度必須至少為4個字符！", {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        },
+      })
+      return
+    }
+  
     setIsLoading(true)
     try {
-      const data = updatePassword(passwords.currentPassword, passwords.newPassword)
+      await updatePassword(passwords.currentPassword, passwords.newPassword)
       
-      console.log("Profile.tsx: ", data)
-
       toast.success("密碼修改成功！", {
         duration: 2000,
         position: 'top-center',
@@ -57,7 +67,8 @@ export default function Profile() {
       })
     } catch (error: any) {
       console.error('Password change error:', error)
-      const errorMessage = getPasswordChangeErrorMessage(error)
+      const errorMessage = error.message || "密碼更新失敗，請稍後再試"
+      
       toast.error(errorMessage, {
         duration: 2000,
         position: 'top-center',
@@ -66,6 +77,12 @@ export default function Profile() {
           color: '#fff',
         },
       })
+      if (errorMessage === 'Old password is incorrect') {
+        setPasswords(prev => ({
+          ...prev,
+          currentPassword: ""
+        }))
+      }
     } finally {
       setIsLoading(false)
     }

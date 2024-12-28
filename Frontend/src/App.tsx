@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
-import { AuthPage } from './pages/AuthPage'
 import FavoriteListPage from './pages/FavoriteListPage'
 import Profile from './pages/Profile'
 import NavBar from './components/NavBar'
@@ -35,7 +34,6 @@ const AppContent = () => {
       <div className='flex-1'>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<AuthPage />} />
           <Route path="/new_login" element={<NewAuthPage />} />
           <Route
             path="/favorites"

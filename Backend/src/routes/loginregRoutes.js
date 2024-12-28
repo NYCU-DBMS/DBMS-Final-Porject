@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const port = 3000;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -14,6 +15,15 @@ const pool = new Pool({
 });
 
 const router = express.Router();
+
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PATCH'], 
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+router.use(cors(corsOptions));
 
 const checkUsersTable = async (req, res, next) => {
   const createTableQuery = `
@@ -67,47 +77,49 @@ router.post('/login', checkUsersTable, async (req, res) => {
 });
 
 router.post('/register', checkUsersTable, async (req, res) => {
-    const { username, email, password } = req.body;
-    console.log("register route");
-    try {
-        if (!username || !email || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
-        }
+  const { username, email, password } = req.body;
+  console.log("register route");
+  try {
+      if (!username || !email || !password) {
+          return res.status(400).json({ error: 'All fields are required' });
+      }
 
-        const existingUserQuery = `
-            SELECT * FROM Users WHERE username = $1 OR email = $2;
-        `;
-        const existingUserResult = await pool.query(existingUserQuery, [username, email]);
+      const checkUsernameQuery = `SELECT username FROM Users WHERE username = $1`;
+      const checkEmailQuery = `SELECT email FROM Users WHERE email = $1`;
+      
+      const usernameResult = await pool.query(checkUsernameQuery, [username]);
+      const emailResult = await pool.query(checkEmailQuery, [email]);
 
-        if (existingUserResult.rows.length > 0) {
-            return res.status(400).json({ error: 'Username or email already registered!' });
-        }
+      if (usernameResult.rows.length > 0) {
+          return res.status(400).json({ error: '用戶名已存在' });
+      }
 
-        //encrypt pw
-        const hashedPassword = await bcrypt.hash(password, 10);
+      if (emailResult.rows.length > 0) {
+          return res.status(400).json({ error: 'Email已被註冊' });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const insertUserQuery = `
+          INSERT INTO Users (username, email, password)
+          VALUES ($1, $2, $3)
+          RETURNING id, username, email;
+      `;
+      const newUserResult = await pool.query(insertUserQuery, [username, email, hashedPassword]);
 
-        const insertUserQuery = `
-            INSERT INTO Users (username, email, password)
-            VALUES ($1, $2, $3)
-            RETURNING id, username, email;
-        `;
-        const newUserResult = await pool.query(insertUserQuery, [username, email, hashedPassword]);
+      const newUser = newUserResult.rows[0];
 
-        const newUser = newUserResult.rows[0];
+      res.status(201).json({
+          message: 'User registered successfully',
+          user: {
+              id: newUser.id,
+              username: newUser.username,
+              email: newUser.email
+          }
+      });
 
-        res.status(201).json({
-            message: 'User registered successfully',
-            user: {
-                id: newUser.id,
-                username: newUser.username,
-                email: newUser.email
-            }
-        });
-
-    } catch (error) {
-        console.error('Error registering user:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+  } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // const authenticate_search = (req, res, next) => {
@@ -160,32 +172,32 @@ router.get('/search/:username', checkUsersTable, async (req, res) => {
     }
 });
 
-router.patch('/update-password', checkUsersTable, async (req, res) => {
-    const { oldPW, newPW, userID } = req.body;
+router.patch('/update-password', async (req, res) => {
+  const { oldPW, newPW, userID } = req.body;
 
-    if (!oldPW || !newPW) {
-      return res.status(400).json({ error: 'Both old and new passwords are required' });
+  if (!oldPW || !newPW) {
+    return res.status(400).json({ error: 'Both old and new passwords are required' });
+  }
+
+  try {  
+    const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
+    const { rows } = await pool.query(userQuery, [userID]);
+    const user = rows[0];
+    const isMatch = await bcrypt.compare(oldPW, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Old password is incorrect' });
     }
-  
-    try {  
-      const userQuery = 'SELECT id, password FROM Users WHERE id = $1';
-      const { rows } = await pool.query(userQuery, [userID]);
-      const user = rows[0];
-      const isMatch = await bcrypt.compare(oldPW, user.password);
-  
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Old password is incorrect' });
-      }
-  
-      const hashedPW = await bcrypt.hash(newPW, 10);
-      const updatePWQuery = 'UPDATE Users SET password = $1 WHERE id = $2';
-      await pool.query(updatePWQuery, [hashedPW, userID]);
-  
-      res.json({ message: 'Password updated successfully' });
-    } catch (err) {
-      console.error('Error updating password:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
+
+    const hashedPW = await bcrypt.hash(newPW, 10);
+    const updatePWQuery = 'UPDATE Users SET password = $1 WHERE id = $2';
+    await pool.query(updatePWQuery, [hashedPW, userID]);
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Error updating password:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 router.patch('/update-email', checkUsersTable, async (req, res) => {

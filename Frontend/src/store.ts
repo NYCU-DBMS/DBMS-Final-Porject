@@ -48,7 +48,7 @@ interface User {
   token: string
 }
 
-interface AuthState {
+export interface AuthState {
   user: User | null
   isLoggedIn: boolean
   login: (username: string, password: string) => Promise<void | "error">
@@ -117,12 +117,14 @@ export const useAuthStore = create<AuthState>()(
               user_id: user.id,
               username: user.username,
               email: user.email,
-              token: user.token || '', // 如果 API 返回 token 的話
+              token: user.token || '',
             },
-            isLoggedIn: true, // 註冊成功後直接登入
+            isLoggedIn: true,
           })
-        } catch (error) {
-          console.error('Registration failed:', error)
+        } catch (error: any) {
+          if (error.response?.data?.error) {
+            throw new Error(error.response.data.error)
+          }
           throw error
         }
       },
@@ -133,14 +135,9 @@ export const useAuthStore = create<AuthState>()(
           if (data.error) {
             throw new Error(data.error)
           }
-          
-          // 密碼更新成功，但不需要在前端存儲密碼
-          // 可以選擇是否要更新 token
           set((state) => ({
             user: state.user ? {
               ...state.user,
-              // 如果 API 返回新的 token，可以在這裡更新
-              // token: data.newToken
             } : null
           }))
         } catch (error) {
@@ -150,9 +147,8 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage', // localStorage 的 key
+      name: 'auth-storage', 
       storage: createJSONStorage(() => localStorage),
-      // 可以選擇只持久化某些字段
       partialize: (state) => ({
         user: state.user,
         isLoggedIn: state.isLoggedIn,
