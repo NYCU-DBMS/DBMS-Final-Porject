@@ -19,7 +19,25 @@ router.get('/', (req, res) => {
     });
 });
 
-router.post("/remove", async (req, res) => {
+const checkRatingTable = async (req, res, next) => {
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS our_user_rating (
+            user_id INTEGER,
+            anime_id INTEGER,
+            rating INTEGER,
+            PRIMARY KEY (user_id, anime_id)
+        );
+    `;
+    try {
+        await pool.query(createTableQuery);
+        next();
+    } catch (error) {
+        console.error('Error ensuring Users table:', error);
+        next();
+    }
+  };
+
+router.post("/remove", checkRatingTable, async (req, res) => {
     const { user_id, anime_id } = req.body;
 
     if (!user_id || !anime_id) {
@@ -28,7 +46,7 @@ router.post("/remove", async (req, res) => {
 
     try {
         const { rows } = await pool.query(`
-            SELECT "rating" FROM user_rating WHERE "username" = $1 AND "anime_id" = $2
+            SELECT "rating" FROM our_user_rating WHERE "user_id" = $1 AND "anime_id" = $2
         `, [user_id, anime_id]);
 
         if (rows.length === 0) {
@@ -38,7 +56,7 @@ router.post("/remove", async (req, res) => {
         const score = rows[0].rating;
 
         await pool.query(`
-            DELETE FROM user_rating WHERE "username" = $1 AND "anime_id" = $2
+            DELETE FROM our_user_rating WHERE "user_id" = $1 AND "anime_id" = $2
         `, [user_id, anime_id]);
 
         await pool.query(`
@@ -58,7 +76,7 @@ router.post("/remove", async (req, res) => {
     }
 });
 
-router.post('/add', async (req, res) => {
+router.post('/add', checkRatingTable, async (req, res) => {
     const { user_id, anime_id, score} = req.body;
 
     if (!user_id || !anime_id || !score) {
@@ -78,7 +96,7 @@ router.post('/add', async (req, res) => {
 
         //update user_rating table
         await pool.query(`
-            INSERT INTO user_rating ("username", "anime_id", "rating")
+            INSERT INTO our_user_rating ("user_id", "anime_id", "rating")
             VALUES ($1, $2, $3)
         `,[user_id,anime_id,score]);
 
@@ -89,7 +107,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-router.post('/getScore', async (req, res) => {
+router.post('/getScore', checkRatingTable, async (req, res) => {
     const { userID, animeID } = req.body;
 
     if (!userID || !animeID) {
@@ -99,8 +117,8 @@ router.post('/getScore', async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT "rating"
-            FROM user_rating
-            WHERE "username" = $1 AND "anime_id" = $2;
+            FROM our_user_rating
+            WHERE "user_id" = $1 AND "anime_id" = $2;
         `, [userID, animeID]);
 
         if (result.rows.length === 0) {
